@@ -1,0 +1,166 @@
+<style>
+    #sidebar {
+        --tw-translate-x: -100%;
+    }
+
+    #menu-close-icon {
+        display: none;
+    }
+
+    #menu-open:checked~#sidebar {
+        --tw-translate-x: 0;
+    }
+
+    #menu-open:checked~* #mobile-menu-button {
+        background-color: rgba(31, 41, 55, var(--tw-bg-opacity));
+    }
+
+    #menu-open:checked~* #menu-open-icon {
+        display: none;
+    }
+
+    #menu-open:checked~* #menu-close-icon {
+        display: block;
+    }
+
+    @media (min-width: 768px) {
+        #sidebar {
+            --tw-translate-x: 0;
+        }
+    }
+</style>
+
+<div class="relative min-h-screen md:flex" data-dev-hint="container">
+    <input type="checkbox" id="menu-open" class="hidden" />
+
+    <header class="bg-gray-600 text-gray-100 flex justify-between md:hidden" data-dev-hint="mobile menu bar">
+        <a href="#" class="block p-4 text-white font-bold whitespace-nowrap truncate">
+            Bharat.AI
+        </a>
+
+        <label for="menu-open" id="mobile-menu-button"
+            class="m-2 p-2 focus:outline-none hover:text-white hover:bg-gray-700 rounded-md">
+            <svg id="menu-open-icon" class="h-6 w-6 transition duration-200 ease-in-out"
+                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <svg id="menu-close-icon" class="h-6 w-6 transition duration-200 ease-in-out"
+                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </label>
+
+      </header>
+
+    <aside id="sidebar"
+        class="bg-gray-800 text-gray-100 md:w-64 w-3/4 space-y-6 pt-6 px-0 absolute inset-y-0 left-0 transform md:relative md:translate-x-0 transition duration-200 ease-in-out  md:flex md:flex-col md:justify-between overflow-y-auto z-50"
+        data-dev-hint="sidebar; px-0 for frameless; px-2 for visually inset the navigation">
+        <div class="w-64">
+
+            <div class="py-4 px-6 justify-center">
+                    <p class="text-teal-50 text-center">Bharat.AI</p>
+            </div>
+    
+            <div class="mb-10">
+                <h3 class="mx-6 mb-2 text-xs text-gray-400 uppercase tracking-widest">
+                    Schools
+                </h3>
+    
+                <a href="/develop/schools" class="flex items-center px-6 py-2.5 text-gray-500 hover:text-orange-600 group">
+                    <svg class="h-5 w-5 text-gray-400 mr-2 group-hover:text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    All
+                </a>
+    
+                <a href="/develop/schools/new" class="flex items-center px-6 py-2.5 text-gray-500 hover:text-orange-600 group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 mr-2 group-hover:text-orange-500" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16"> 
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/> <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/> 
+                    </svg>
+                    New
+                </a>
+    
+                <a href="/" class="flex items-center px-6 py-2.5 text-gray-500 hover:text-orange-600 group">
+                    <svg class="h-5 w-5 text-gray-400 mr-2 group-hover:text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
+                    Most commented
+                </a>
+    
+            </div>
+    
+            <div class="mb-10">
+                <h3 class="mx-6 mb-2 text-xs text-gray-400 uppercase tracking-widest">
+                    Library
+                </h3>
+    
+                <a href="/" class="flex items-center px-6 py-2.5 text-gray-500 hover:text-orange-600 group">
+                    <svg class="h-5 w-5 text-gray-400 mr-2 group-hover:text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                    </svg>
+                    Favorites
+                </a>
+    
+                <a href="/" class="flex items-center px-6 py-2.5 text-gray-500 hover:text-orange-600 group">
+                    <svg class="h-5 w-5 text-gray-400 mr-2 group-hover:text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Watch later
+                </a>
+    
+                <a href="/" class="flex items-center px-6 py-2.5 text-gray-500 hover:text-orange-600 group">
+                    <svg class="h-5 w-5 text-gray-400 mr-2 group-hover:text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                    </svg>
+                    History
+                </a>
+    
+                <a href="/" class="flex items-center px-6 py-2.5 text-gray-500 hover:text-orange-600 group">
+                    <svg class="h-5 w-5 text-gray-400 mr-2 group-hover:text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    Scheduled
+                </a>
+    
+            </div>
+            <div class="mb-10">
+                <h3 class="mx-6 mb-2 text-xs text-gray-400 uppercase tracking-widest">
+                    Following
+                </h3>
+    
+                <a href="/" class="flex items-center px-6 py-2.5 text-gray-500 hover:text-orange-600 group">
+                    <img src="<%=image_url "favicon.png"%>" alt="" class="w-7 h-7 rounded-full mr-2">
+                    Bharat Bhushan
+                </a>
+    
+            </div>
+    
+        </div>
+    </aside>
+
+    <div class="flex-1">
+        <div class="hidden md:block w-100 bg-slate-600 py-2">
+            <button id="sidebar-toggle-button" class="hidden md:block  bg-gray-600 text-white rounded-md" onclick="toggleSidebar()">
+            <p class="mx-2 px-2">
+                <svg data-name="Layer 3" xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 32 128" fill="#fff"><path d="M97.092 36.078H30.908a2.111 2.111 0 0 0 0 4.222h66.184a2.111 2.111 0 0 0 0-4.222zM97.092 61.889H30.908a2.111 2.111 0 0 0 0 4.222h66.184a2.111 2.111 0 0 0 0-4.222zM97.092 87.7H30.908a2.111 2.111 0 0 0 0 4.222h66.184a2.111 2.111 0 0 0 0-4.222z"/></svg>
+            </p>
+            </button>
+        </div>
+        <%=yield%>
+    </div>
+</div>
+
+<script>
+    function toggleSidebar() {
+        const toogleButton = document.getElementById("sidebar-toggle-button");
+        const sidebar = document.getElementById("sidebar");
+        if(sidebar.style.display == "none"){
+            sidebar.style.display = "";
+            toogleButton.classList.add("rotate-0");
+        }
+        else{
+            sidebar.style.display = "none";
+            toogleButton.classList.add("rotate-180");
+        }
+    }
+</script>

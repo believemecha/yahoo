@@ -1,0 +1,18 @@
+<div class="max-w-md mx-auto mt-20">
+  <h2 class="text-2xl font-bold mb-4">Resend confirmation instructions</h2>
+
+  <%= form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post, class: "w-full" }) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
+
+    <div class="mb-4">
+      <%= f.label :email, class: 'block text-gray-700 text-sm font-bold mb-2' %>
+      <%= f.email_field :email, autofocus: true, autocomplete: "email", class: 'form-input mt-1 block w-full', value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email) %>
+    </div>
+
+    <div class="text-center mb-4">
+      <%= f.submit "Resend confirmation instructions", class: 'bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full' %>
+    </div>
+  <% end %>
+
+  <%= render "devise/shared/links" %>
+</div>

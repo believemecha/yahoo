@@ -1,0 +1,37 @@
+<!-- app/views/tasks/index.html.erb -->
+<h1>Tasks</h1>
+<%= link_to 'New Task', new_task_path, class: 'btn btn-primary' %>
+
+<table class="table table-striped mt-2">
+  <thead>
+    <tr>
+      <th>Id</th>
+      <th>Name</th>
+      <th>Description</th>
+      <th>TimeLine</th>
+      <th>Videos/Images</th>
+      <th>Cost</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @tasks.each do |task| %>
+      <tr>
+        <td><%= task.id %></td>
+        <td><%= task.name %></td>
+        <td><%= task.description.truncate(50) %></td>
+        <td><span style="font-size: 12px;"><%= task.start_time %> <br> <%= task.end_time %></span></td>
+        <td><a href="/tasks/add_files?id=<%=task.id%>" target="_blank"><%= task.links.length %> Uploaded </a></td>
+        <td><%= task.cost %></td>
+        <td><%= task.status %></td>
+        <td>
+          <%= link_to 'View/Edit', new_task_path(id: task.id), class: 'btn btn-warning' %>
+          <%= link_to 'Submissions', submissions_tasks_path(task_id: task.id), class: 'btn btn-info mx-1' %>
+           <!-- <%= link_to 'Delete', task_path(task), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger' %>
+           !-->
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

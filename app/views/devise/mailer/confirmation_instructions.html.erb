@@ -1,0 +1,6 @@
+<img src="<%=(Rails.application.config.base_url + '/logo.png')%>" style: "width:100%;max-height:200px">
+<p>Welcome <%= @email %>!</p>
+
+<p>You can confirm your account email through the link below:</p>
+
+<p><%= link_to 'Confirm my account', confirmation_url(@resource, confirmation_token: @token) %></p>

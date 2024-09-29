@@ -1,0 +1,85 @@
+<!-- app/views/tasks/new.html.erb -->
+<h1><%= @task.new_record? ? 'New Task' : 'Edit Task' %></h1>
+
+<form id="taskForm" onsubmit="submitTask(event)">
+  <input type="text" name="id" id="name" class="form-control d-none" value="<%= @task.id %>" hidden>
+
+  <div class="form-group">
+    <label for="name">Name</label>
+    <input type="text" name="tg_task[name]" id="name" class="form-control" value="<%= @task.name %>" required>
+  </div>
+
+  <div class="form-group">
+    <label for="description">Description</label>
+    <textarea name="tg_task[description]" id="description" class="form-control" required><%= @task.description %></textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="cost">Cost</label>
+    <input type="number" name="tg_task[cost]" id="cost" class="form-control" step="0.01" value="<%= @task.cost %>" required>
+  </div>
+
+  <div class="form-group">
+    <label for="status">Status</label>
+    <select name="tg_task[status]" id="status" class="form-control">
+      <option value="active" <%= @task.status == 'active' ? 'selected' : '' %>>Active</option>
+      <option value="inactive" <%= @task.status == 'inactive' ? 'selected' : '' %>>Inactive</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="submission_type">Submission Type</label>
+    <select name="tg_task[submission_type]" id="submission_type" class="form-control">
+      <option value="text" <%= @task.submission_type == 'text' ? 'selected' : '' %>>Text</option>
+      <option value="image" <%= @task.submission_type == 'image' ? 'selected' : '' %>>Image</option>
+      <option value="video" <%= @task.submission_type == 'video' ? 'selected' : '' %>>Video</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="start_time">Start Time</label>
+    <input type="datetime-local" name="tg_task[start_time]" id="start_time" class="form-control" value="<%= @task.start_time&.strftime('%Y-%m-%dT%H:%M') %>">
+  </div>
+
+  <div class="form-group">
+    <label for="end_time">End Time</label>
+    <input type="datetime-local" name="tg_task[end_time]" id="end_time" class="form-control" value="<%= @task.end_time&.strftime('%Y-%m-%dT%H:%M') %>">
+  </div>
+
+  <div class="form-group">
+    <label for="links">Links</label>
+    <input type="text" name="tg_task[links]" id="links" class="form-control" placeholder="Comma-separated links" value="<%= @task.links.join(', ') if @task.links.present? %>">
+  </div>
+
+  <button type="submit" class="btn btn-success"><%= @task.new_record? ? 'Create Task' : 'Update Task' %></button>
+</form>
+
+<button onclick="window.location.href='<%= tasks_path %>';" class="btn btn-secondary mt-2">Back to Tasks</button>
+
+<script>
+  function submitTask(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    const formData = new FormData(document.getElementById('taskForm'));
+    const method = "POST";
+    const url = "/tasks/create_or_edit";
+
+    fetch(url, {
+      method: method,
+      body: formData,
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert(data.message);
+        window.location.href = "<%= tasks_path %>";
+      } else {
+        alert('Error: ' + (data.errors ? data.errors.join(', ') : 'An unknown error occurred.'));
+      }
+    })
+    .catch(error => console.error('Error:', error));
+  }
+</script>

@@ -1,0 +1,18 @@
+<!-- app/views/tasks/add_files.html.erb -->
+<h1>Add Files to Task: <%= @task.name %></h1>
+
+<div><b>Already Uploaded:</b> <br> <%=@task.links.join("\n")%></div>
+
+<br>
+
+<%= form_with(url: upload_file_to_task_tasks_path(@task), local: true, html: { multipart: true }) do |form| %>
+  <div class="form-group">
+    <label for="files">Select Files</label>
+    <%= form.file_field :files, multiple: true, class: 'form-control', accept: "image/png, video/mp4, image/jpeg" %>
+  </div>
+  <input name="id" value="<%=@task.id%>" hidden>
+
+  <%= form.submit 'Upload Files', class: 'btn btn-primary' %>
+<% end %>
+
+<%= link_to 'Back to Task', task_path(@task), class: 'btn btn-secondary mt-2' %>

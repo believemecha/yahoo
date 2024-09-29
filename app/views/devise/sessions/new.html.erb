@@ -1,0 +1,39 @@
+<div class="min-h-screen flex justify-center items-center" style="background-image: url('<%=image_url "ui/pattern-white.svg"%>'); background-position: center;">
+  <div class="max-w-md w-full">
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+      <h2 class="text-2xl text-center text-gray-900 mb-4">
+        Login
+        </h2>
+
+      <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: 'form' }) do |f| %>
+        <div class="mb-4">
+          <%= f.label :email, class: 'block text-gray-700 text-sm font-bold mb-2' %>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: 'form-input mt-1 block w-full' %>
+        </div>
+
+        <div class="mb-4">
+          <%= f.label :password, class: 'block text-gray-700 text-sm font-bold mb-2' %>
+          <%= f.password_field :password, autocomplete: "current-password", class: 'form-input mt-1 block w-full' %>
+        </div>
+
+        <% if devise_mapping.rememberable? %>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">
+              <%= f.check_box :remember_me, class: 'form-checkbox mr-2' %>
+              Remember Me
+            </label>
+          </div>
+        <% end %>
+
+        <div class="text-center">
+          <%= f.submit "Log in", class: 'bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' %>
+          <br>
+          <br>
+          <%= link_to "Login With Otp", with_otp_custom_login_index_path, class:"mt-4 text-blue" %>
+        </div>
+      <% end %>
+
+      <%= render "devise/shared/links" %>
+    </div>
+  </div>
+</div>

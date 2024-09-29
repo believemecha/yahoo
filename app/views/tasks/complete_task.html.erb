@@ -1,0 +1,52 @@
+<!-- app/views/tasks/complete_task.html.erb -->
+
+<h1><%= @is_new_submission ? 'Submit Task' : 'Edit Task' %></h1>
+
+<form id="taskForm" onsubmit="submitTask(event)" enctype="multipart/form-data">
+  <input type="hidden" name="task_code" id="task_code" value="<%= @task.code %>">
+  <input type="hidden" name="user_code" id="user_code" value="<%= @user.code %>">
+
+  <b><%=@task.name%></b> 
+  <br> 
+  <b><%=@task.description%></b>
+  <br>
+  <br>
+  
+  <div class="form-group">
+    <label for="description">Description</label>
+    <textarea name="description" id="description" class="form-control" required rows="6"><%= @task_submission&.description || '' %></textarea>
+  </div>
+  
+  <%if @task.image? || @task.video?%>
+    <div class="form-group">
+        <label for="files">Upload Images and Videos</label>
+        <input type="file" name="files[]" id="files" class="form-control" multiple accept="image/*,video/*" <%=@task_submission&.uploaded_files.to_a.length == 0 ? "required" : ""%>>
+        <span>Prevously Choosen: <%=@task_submission&.uploaded_files.to_a.length%> files</span>
+    </div>
+  <%end%>
+
+  <button type="submit" class="btn btn-success"><%= @is_new_submission ? 'Submit' : 'Update Task' %></button>
+</form>
+
+<script>
+  function submitTask(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    const formData = new FormData(document.getElementById('taskForm'));
+    const method = "POST";
+    const url = "/tasks/update_complete_task";
+
+    fetch(url, {
+      method: method,
+      body: formData,
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert(data.message);
+    })
+    .catch(error => console.error('Error:', error));
+  }
+</script>

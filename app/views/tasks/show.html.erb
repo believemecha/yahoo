@@ -1,0 +1,39 @@
+<!-- app/views/tasks/show.html.erb -->
+<h1><%= @task.name %></h1>
+<p><strong>Description:</strong> <%= @task.description %></p>
+<p><strong>Cost:</strong> <%= number_to_currency(@task.cost) %></p>
+<p><strong>Status:</strong> <%= @task.status.humanize %></p>
+<p><strong>Start Time:</strong> <%= @task.start_time&.strftime("%B %d, %Y %I:%M %p") || 'Not Set' %></p>
+<p><strong>End Time:</strong> <%= @task.end_time&.strftime("%B %d, %Y %I:%M %p") || 'Not Set' %></p>
+
+<p><strong>Submission Type:</strong> <%= @task.submission_type.try(:humanize)%></p>
+
+<h3>Submissions</h3>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Description</th>
+      <th>Status</th>
+      <th>Uploaded Files</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if @submissions.any? %>
+      <% @submissions.each do |submission| %>
+        <tr>
+          <td><%= submission.tg_user_id ? TgUser.find(submission.tg_user_id).name : 'Unknown User' %></td>
+          <td><%= submission.description %></td>
+          <td><%= submission.status.humanize %></td>
+          <td><%= submission.uploaded_files.present? ? submission.uploaded_files.join(", ") : 'No Files' %></td>
+        </tr>
+      <% end %>
+    <% else %>
+      <tr>
+        <td colspan="4" class="text-center">No submissions yet.</td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= link_to 'Back to Tasks', tasks_path, class: 'btn btn-secondary' %>

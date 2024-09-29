@@ -1,0 +1,28 @@
+<h1>TgTask Submissions</h1>
+<%if @task.present?%>
+    <h4>Showing Submissions for Task: <b>(<%=@task.name%>):<%=@task.id%></b> </h4>
+<%end%>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Task Id</th>
+      <th>User</th>
+      <th>Description</th>
+      <th>Status</th>
+      <th>Uploaded Files</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @submissions.each do |submission| %>
+      <tr>
+        <td><%= submission.tg_task_id %></td>
+        <td><%= submission.tg_user.name if submission.tg_user_id %>: <%=submission.tg_user_id%></td>
+        <td><%= submission.description %></td>
+        <td><%= submission.status %></td>
+        <td><%= submission.uploaded_files.join(", ") if submission.uploaded_files.any? %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= link_to 'Back to Tasks', tasks_path, class: 'btn btn-secondary' %>

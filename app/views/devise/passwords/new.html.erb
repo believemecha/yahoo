@@ -1,0 +1,24 @@
+<div class="min-h-screen bg-gray-100 flex justify-center mt-8 bg-white">
+     <div class="w-full md:w-1/2 md:pr-4">
+      <%= image_tag(url_for("/logo.png"), style: "width:100%;height:200px") %>
+    </div>
+       <div class="w-full md:w-1/2 md:pr-4 max-w-md bg-white p-8 shadow-lg rounded-lg"">
+      <h2 class="text-2xl font-bold mb-4">Forgot your password?</h2>
+
+      <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post, class: "w-full" }) do |f| %>
+        <%= render "devise/shared/error_messages", resource: resource %>
+
+        <div class="mb-4">
+          <%= f.label :email, class: 'block text-gray-700 text-sm font-bold mb-2' %>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: 'form-input mt-1 block w-full' %>
+        </div>
+
+        <div class="text-center mb-4">
+          <%= f.submit "Send me reset password instructions", class: 'bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full' %>
+        </div>
+        <% end %>
+        <%= render "devise/shared/links" %>
+
+  </div>
+
+</div>

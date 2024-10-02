@@ -1,0 +1,29 @@
+<h3><a href="/tasks_history?user_code=<%=@user.code%>" class="btn btn-warning btn-sm" data-turbolinks="false"> << See Tasks History</a></h3>
+<h2>Your Submissions</h2>
+<% if @task.present? %>
+    <h4>Showing Submissions for Task: <b>(<%= @task.name %>)</b></h4>
+<% end %>
+
+
+
+<!-- Card view for mobile -->
+<div class="d-block">
+  <div class="row">
+    <% @submissions.each do |submission| %>
+      <div class="col-12 mb-3">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title"><%= submission.description %></h5>
+            <p class="card-text"><strong>Submission Status:</strong> <%= submission.status %></p>
+            <p class="card-text"><strong>Uploaded Files:</strong> <%= submission.uploaded_files.count %> Files</p>
+            <p class="card-text"><strong>Submitted At:</strong> <%= submission.updated_at %></p>
+            <p class="card-text"><strong>Payment Status</strong> <%= submission.is_paid ? "Done" : "Requested" %></p>
+            <a href="/complete_task?user_code=<%= @user.code %>&task_code=<%= @task.code %>&submission_code=<%= submission.code %>" class="btn btn-sm btn-primary">Edit</a>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<%= link_to 'Add New Submission', "/complete_task?user_code=#{@user.code}&task_code=#{@task.code}", class: 'btn btn-secondary mt-3 mb-5' %>

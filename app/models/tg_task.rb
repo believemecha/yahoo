@@ -1,5 +1,8 @@
 # app/models/tg_task.rb
 class TgTask < ApplicationRecord
+
+  has_many :tg_task_submissions
+  
   # Enums for task status
   enum status: {
     active: 0,

@@ -5,24 +5,67 @@
 <table class="table">
   <thead>
     <tr>
+      <th>Submission Id</th>
       <th>Task Id</th>
       <th>User</th>
       <th>Description</th>
       <th>Status</th>
       <th>Uploaded Files</th>
+      <th>Is Paid</th>
+      <th>Rate</th>
     </tr>
   </thead>
   <tbody>
     <% @submissions.each do |submission| %>
       <tr>
+        <td><%= submission.id %></td>
         <td><%= submission.tg_task_id %></td>
         <td><%= submission.tg_user.name if submission.tg_user_id %>: <%=submission.tg_user_id%></td>
         <td><%= submission.description %></td>
         <td><%= submission.status %></td>
-        <td><%= submission.uploaded_files.join(", ") if submission.uploaded_files.any? %></td>
+        <td><%= submission.uploaded_files.length if submission.uploaded_files.any? %></td>
+        <td>
+          <div class="btn btn-sm btn-primary <%= submission.is_paid ? "btn-success" : ""%>" onclick="toogleData(this,'<%=submission.code%>','payment')">
+            <%= submission.is_paid ? "Mark Unpaid" : "Mark Paid" %>
+          </div>
+        </td>
+        <td>
+          <div class="btn btn-sm btn-primary <%= submission.approved? ? "btn-success" : ""%>" onclick="toogleData(this,'<%=submission.code%>','rating')">
+            <%= submission.approved? ? "Approved" : "Approve" %>
+          </div>          
+        </td>
+
       </tr>
     <% end %>
   </tbody>
 </table>
 
 <%= link_to 'Back to Tasks', tasks_path, class: 'btn btn-secondary' %>
+
+<script>
+  function toogleData(selector,code,toogle_type){
+    const formData = new FormData;
+    formData.append("submission_code",code);
+    formData.append("toogle_type",toogle_type);
+
+    fetch("/tasks/toogle_submission", {
+      method: "POST",
+      body: formData,
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      Swal.fire({
+        icon: data.status ? "success" : "error",
+        text: data.message
+      }).then(()=>{
+          if(data.status){
+            window.location.reload();
+          }
+      })
+    })
+    .catch(error => console.error('Error:', error));
+  }
+</script>

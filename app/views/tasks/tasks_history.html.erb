@@ -1,0 +1,24 @@
+<h2>Your Tasks History</h2>
+
+<div class="row mt-3">
+  <% @tasks.each do |task| %>
+    <div class="col-md-4 mb-4">
+      <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Task: <b><%= task.name %></b></h5>
+            <p class="card-text">
+            <strong>Description:</strong> <%= task.description.truncate(50) %><br>
+            <strong>Cost:</strong> <%= task.cost %><br>
+          </p>
+          <div class="d-flex justify-content-between">
+            <%= link_to 'View Submissions', "/submitted_tasks?user_code=#{@user.code}&task_code=#{task.code}", class: 'btn btn-warning' %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  <%if !@tasks.present?%>
+    <p class="col-md-12 text-center">No Data Available</p>
+  <%end%>
+
+</div>

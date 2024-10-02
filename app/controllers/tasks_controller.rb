@@ -108,11 +108,34 @@ class TasksController < ApplicationController
     @task = TgTask.find_by(code: params[:task_code])
     @user = TgUser.find_by(code: params[:user_code])
 
+    submission_code = params[:submission_code]
+
     return render json: {success: false, message: "Invalid Request"} unless @task.present? && @user.present?
 
-    @task_submission = TgTaskSubmission.find_by(tg_user_id: @user.try(:id), tg_task_id: @task.try(:id))
+    @task_submission = TgTaskSubmission.find_by(code: submission_code)
 
+    if @task_submission.present? && ( @task_submission.tg_user_id != @user.id || @task_submission.tg_task_id != @task.id)
+      return render json: {success: false, message: "Invalid Request"} unless @task.present? && @user.present?
+    end
+    
     @is_new_submission = @task_submission.nil?
+  end
+
+  def submitted_tasks
+    @task = TgTask.find_by(code: params[:task_code])
+    @user = TgUser.find_by(code: params[:user_code])
+    
+    return render json: {success: false, message: "Invalid Request"} unless @task.present? && @user.present?
+    
+    @submissions = TgTaskSubmission.where(tg_user_id: @user.try(:id), tg_task_id: @task.try(:id)).order(created_at: :desc)
+  end
+
+  def tasks_history
+    @user = TgUser.find_by(code: params[:user_code])
+
+    return render json: {success: false, message: "Invalid Request"} unless @user.present?
+    
+    @tasks = TgTask.joins(:tg_task_submissions).where(tg_task_submissions: {tg_user_id: @user.id}).distinct
   end
 
   def update_complete_task
@@ -121,8 +144,20 @@ class TasksController < ApplicationController
 
     return render json: {success: false, message: "Invalid Request"} unless @task.present? && @user.present?
 
+    submission_code = params[:submission_code]
+
+    @task_submission = TgTaskSubmission.find_by(code: submission_code)
+
+    if @task_submission.present? &&( @task_submission.tg_user_id != @user.id || @task_submission.tg_task_id != @task.id)
+      return render json: {success: false, message: "Invalid Request"} unless @task.present? && @user.present?
+    end
     
-    @task_submission = TgTaskSubmission.find_or_initialize_by(tg_user_id: @user.try(:id), tg_task_id: @task.try(:id))
+    if !@task_submission.present?
+      @task_submission = TgTaskSubmission.new(tg_user_id: @user.try(:id), tg_task_id: @task.try(:id))
+      if TgTaskSubmission.where(tg_user_id: @user.try(:id), tg_task_id: @task.try(:id)).count >= @task.maximum_per_user.to_i
+        return render json: {success: false, redirect: true, message: "Maximum mumber of submissions reached for this task."}
+      end
+    end
 
     @task_submission.submission_type = @task.submission_type
 
@@ -140,11 +175,72 @@ class TasksController < ApplicationController
     end
 
     if @task_submission.update(description: params[:description],uploaded_files: file_ids)
-      render json: {success: false, message: "Uploaded Successfully"}
+      render json: {success: true, message: "Uploaded Successfully"}
     else
       render json: {success: false, message: "Something Went Wrong: #{@task_submission.errors.full_messages.join("/n")}"}
     end
   end
+
+  def export_csv
+    @task_submissions = TgTaskSubmission.includes(:tg_task,:tg_user)
+
+    csv_data = CSV.generate(headers: true) do |csv|
+      csv << ['Submission Id', 'Task ID', 'Task Name', 'User Name', 'Text Proof','Submitted At', 'Image/Video Prrof']
+
+      @task_submissions.each do |tg_submission|
+        tg_user = tg_submission.tg_user
+        tg_task = tg_submission.tg_task
+        csv << [tg_submission.id, tg_task.id,tg_task.name, tg_user.name, tg_submission.description,tg_submission.updated_at,tg_submission.submitted_urls(@base_url)]
+      end
+    end
+
+    respond_to do |format|
+      format.csv { send_data csv_data, filename: "tasks-#{Date.today}.csv" }
+    end
+  end
+
+  def download_file
+    file_id = params[:file_id]
+
+    file_path = get_file_path_from_telegram(file_id)
+
+    if file_path
+      file_url = "https://api.telegram.org/file/bot#{@token_key}/#{file_path}"
+
+      redirect_to file_url, allow_other_host: true
+    else
+      render plain: "File not found", status: :not_found
+    end
+  end
+
+  def toogle_submission
+    submission_code = params[:submission_code]
+    toogle_type = params[:toogle_type]
+
+    @submission = TgTaskSubmission.find_by(code: submission_code)
+
+    return render json: {status: false, message: "Invalid Submission Id"} unless @submission.present?
+
+    if toogle_type == "rating"
+      final_status = @submission.approved? ? "pending" : "approved" 
+      if @submission.update(status: final_status)
+        return render json: {status: true, message: "Updated Successfully"}
+      else
+        return render json: {status: false, message: "Something Went Wrong"}
+      end
+    elsif toogle_type == "payment"
+      final_paid = !@submission.is_paid
+      if @submission.update(is_paid: final_paid)
+        return render json: {status: true, message: "Updated Successfully"}
+      else
+        return render json: {status: false, message: "Something Went Wrong"}
+      end
+    else
+      render json: {status: false, message: "Invalid Action"}
+    end
+  end
+
+  
 
   private
 
@@ -153,6 +249,25 @@ class TasksController < ApplicationController
   end
 
   def task_params
-    params.require(:tg_task).permit(:cost, :name, :description, :status, :submission_type, :start_time, :end_time, links: [])
+    params.require(:tg_task).permit(:cost, :name, :description, :status, :submission_type, :start_time, :end_time, :maximum_per_user,:minimum_gap_in_hours)
+  end
+
+  def get_file_path_from_telegram(file_id)
+    begin
+      uri = URI("https://api.telegram.org/bot#{@token_key}/getFile?file_id=#{file_id}")
+      
+      response = Net::HTTP.get(uri)
+      
+      file_info = JSON.parse(response)
+      
+      if file_info['ok']
+        file_info['result']['file_path']
+      else
+        nil
+      end
+    rescue StandardError => e
+      logger.error "Error fetching file path: #{e.message}"
+      nil
+    end
   end
 end

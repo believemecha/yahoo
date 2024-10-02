@@ -47,8 +47,13 @@
   </div>
 
   <div class="form-group">
-    <label for="links">Links</label>
-    <input type="text" name="tg_task[links]" id="links" class="form-control" placeholder="Comma-separated links" value="<%= @task.links.join(', ') if @task.links.present? %>">
+    <label for="maximum_per_user">Maximum Submission Per User</label>
+    <input type="number" name="tg_task[maximum_per_user]" id="maximum_per_user" class="form-control" step="1" value="<%= @task.maximum_per_user || 1%>" required>
+  </div>
+
+  <div class="form-group">
+    <label for="minimum_gap_in_hours">Minimum Gap In Submission In hours</label>
+    <input type="number" name="tg_task[minimum_gap_in_hours]" id="minimum_gap_in_hours" class="form-control" step="1" value="<%= @task.minimum_gap_in_hours || 0%>">
   </div>
 
   <button type="submit" class="btn btn-success"><%= @task.new_record? ? 'Create Task' : 'Update Task' %></button>

@@ -5,6 +5,7 @@
 <form id="taskForm" onsubmit="submitTask(event)" enctype="multipart/form-data">
   <input type="hidden" name="task_code" id="task_code" value="<%= @task.code %>">
   <input type="hidden" name="user_code" id="user_code" value="<%= @user.code %>">
+  <input type="hidden" name="submission_code" id="submission_code" value="<%= @task_submission.try(:code) %>">
 
   <b><%=@task.name%></b> 
   <br> 
@@ -30,11 +31,15 @@
 
 <script>
   function submitTask(event) {
-    event.preventDefault(); // Prevent the default form submission
+    event.preventDefault();
 
     const formData = new FormData(document.getElementById('taskForm'));
     const method = "POST";
     const url = "/tasks/update_complete_task";
+    <%
+    all_submissions_url = "#{@base_url}/submitted_tasks?user_code=#{@user.code}&task_code=#{@task.code}"
+    %>
+    const all_s = "<%=all_submissions_url%>";
 
     fetch(url, {
       method: method,
@@ -45,7 +50,14 @@
     })
     .then(response => response.json())
     .then(data => {
-      alert(data.message);
+      Swal.fire({
+        icon: data.success ? "success" : "error",
+        text: data.message
+      }).then(()=>{
+          if(data.success || data.redirect){
+            window.location.href = all_s;
+          }
+      })
     })
     .catch(error => console.error('Error:', error));
   }

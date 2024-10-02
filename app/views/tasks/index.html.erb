@@ -12,6 +12,8 @@
       <th>Videos/Images</th>
       <th>Cost</th>
       <th>Status</th>
+      <th>Maximum Sub Limit</th>
+      <th>Minimum Gap</th>
       <th>Actions</th>
     </tr>
   </thead>
@@ -25,11 +27,11 @@
         <td><a href="/tasks/add_files?id=<%=task.id%>" target="_blank"><%= task.links.length %> Uploaded </a></td>
         <td><%= task.cost %></td>
         <td><%= task.status %></td>
+        <td><%= task.maximum_per_user %></td>
+        <td><%= task.minimum_gap_in_hours %></td>
         <td>
           <%= link_to 'View/Edit', new_task_path(id: task.id), class: 'btn btn-warning' %>
           <%= link_to 'Submissions', submissions_tasks_path(task_id: task.id), class: 'btn btn-info mx-1' %>
-           <!-- <%= link_to 'Delete', task_path(task), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger' %>
-           !-->
         </td>
       </tr>
     <% end %>

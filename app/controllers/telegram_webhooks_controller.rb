@@ -29,8 +29,11 @@ class TelegramWebhooksController < ApplicationController
         list_tasks(tg_user)
       when '/start'
         send_message(chat_id, "Welcome, #{user_name}! Use /tasks to see available tasks.")
+      when '/tasks_history'
+        url = "#{@base_url}/tasks_history?user_code=#{tg_user.code}"
+        send_web_app_link("Click Here To View History",chat_id,url)
       else
-        send_message(chat_id, "Command not recognized. Use /tasks to see available tasks.")
+        send_message(chat_id, "Command not recognized. Use /tasks to see available tasks. /tasks_history to see tasks history.")
       end
     elsif callback_query
       process_callback_query(callback_query)
@@ -42,7 +45,7 @@ class TelegramWebhooksController < ApplicationController
   private
 
   def list_tasks(user)
-    tasks = TgTask.active
+    tasks = TgTask.active.where("tg_tasks.start_time <= ? and tg_tasks.end_time >= ?",Time.zone.now,Time.zone.now)
     if tasks.any?
       tasks.each do |task|
         message = "<b>Task: #{task.name}</b>\n" \
@@ -67,7 +70,7 @@ class TelegramWebhooksController < ApplicationController
         inline_keyboard: [
           [
             Telegram::Bot::Types::InlineKeyboardButton.new(
-              text: "Complete Task #{task.id}",
+              text: "Complete Task #{task.name}",
               callback_data: "complete_task_#{task.id}"
             )
           ]
@@ -87,12 +90,13 @@ class TelegramWebhooksController < ApplicationController
 
       task = TgTask.find_by(id: task_id)
       if task && tg_user
-        url = @base_url + "/complete_task?user_code=#{tg_user.code}&task_code=#{task.code}"
+        url = @base_url + "/submitted_tasks?user_code=#{tg_user.code}&task_code=#{task.code}"
         send_web_app_link("Click here to Complete",chat_id,url)
       else
         send_message(chat_id, "Task not found.")
       end
     end
+    
   end
 
   def old_process_callback_query(callback_query)

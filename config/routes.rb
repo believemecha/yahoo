@@ -12,6 +12,10 @@ Rails.application.routes.draw do
 
   get "/complete_task", to: "tasks#complete_task"
 
+  get "/submitted_tasks", to: "tasks#submitted_tasks"
+
+  get "/tasks_history", to: "tasks#tasks_history"
+
   post 'webhooks/telegram', to: 'telegram_webhooks#receive'
 
   resources :tasks do
@@ -21,6 +25,9 @@ Rails.application.routes.draw do
       get :add_files
       post :upload_file_to_task
       post :update_complete_task
+      get :download_file
+      get :export_csv
+      post :toogle_submission
     end
   end
 end

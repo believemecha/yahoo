@@ -15,6 +15,8 @@
       <th>Maximum Sub Limit</th>
       <th>Minimum Gap</th>
       <th>Actions</th>
+      <th>Actions</th>
+      <th>Download</th>
     </tr>
   </thead>
   <tbody>
@@ -31,7 +33,15 @@
         <td><%= task.minimum_gap_in_hours %></td>
         <td>
           <%= link_to 'View/Edit', new_task_path(id: task.id), class: 'btn btn-warning' %>
-          <%= link_to 'Submissions', submissions_tasks_path(task_id: task.id), class: 'btn btn-info mx-1' %>
+
+        </td>
+
+        <td>
+                            <%= link_to 'Submissions', submissions_tasks_path(task_id: task.id), class: 'btn btn-info mx-1' %>
+
+        </td>
+        <td>
+                    <%= link_to 'Download', "/tasks/export_csv.csv?task_id=#{task.id}", class: 'btn btn-info mx-1' %>
         </td>
       </tr>
     <% end %>

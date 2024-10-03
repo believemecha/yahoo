@@ -35,6 +35,5 @@ class TgTaskSubmission < ApplicationRecord
     end
     self.code = @code
   end
-  
 
 end

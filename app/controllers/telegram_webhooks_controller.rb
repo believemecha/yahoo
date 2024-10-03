@@ -4,6 +4,7 @@ class TelegramWebhooksController < ApplicationController
 
   def receive
     message = params['message']
+
     callback_query = params['callback_query']
   
     if message
@@ -24,16 +25,69 @@ class TelegramWebhooksController < ApplicationController
   
       text = message['text']
 
+      if reply_to_message_id.present? && tg_user.wallet_message_id == reply_to_message_id.to_i
+        tg_user.update_columns(wallet_address: text)
+        send_message(chat_id,"Wallet Updated Successfully to Address: <b>#{tg_user.reload.wallet_address}</b>")
+        return head :ok
+      end
+
+      if !tg_user.wallet_address.present?
+        message = "<b> Please make sure you're familiar with crypto & the wallet address you entered is correct ,before you proceed.
+        </b>\n <b>Wallet Address is required before we proceed! </b>"
+        send_message(chat_id,message)
+        wallet_message_id = send_message(chat_id,"Our default crypto is USDT, on network BEP20. Please reply to me on this message with the wallet address.")
+        tg_user.update(wallet_message_id: wallet_message_id) if wallet_message_id.present?
+        return head :ok
+      end
+
       case text
       when '/tasks'
         list_tasks(tg_user)
       when '/start'
-        send_message(chat_id, "Welcome, #{user_name}! Use /tasks to see available tasks.")
+        welcome_message = <<~TEXT
+        Welcome, <b>#{user_name}</b>!
+
+        Here are the available commands you can use:
+        
+        - <b>/tasks</b>: View the list of available tasks.
+        - <b>/tasks_history</b>: View your task completion history.
+        - <b>/enter_wallet</b>: Add or update your wallet address.
+        - <b>/profile</b>: View your profile details, including wallet address and total earnings.
+        
+        Feel free to explore the commands above!
+      TEXT
+      send_message(chat_id, welcome_message)
+      # send_message(chat_id, "Welcome, #{user_name}! Use /tasks to see available tasks.")
       when '/tasks_history'
         url = "#{@base_url}/tasks_history?user_code=#{tg_user.code}"
         send_web_app_link("Click Here To View History",chat_id,url)
+      when "/enter_wallet"
+        message = "<b> Please make sure you're familiar with crypto & the wallet address you entered is correct ,before you proceed.
+        </b>"
+        send_message(chat_id,message)
+        wallet_message_id = send_message(chat_id,"Our default crypto is USDT, on network BEP20. Please reply to me on this message with the wallet address.")
+        tg_user.update(wallet_message_id: wallet_message_id) if wallet_message_id.present?
+      when "/profile"
+        profile_message = "Dear <b>#{tg_user.name}</b>,\nYour profile details are as below:\n" \
+                  "<b>Name</b>: #{tg_user.name}\n" \
+                  "<b>Wallet Address</b>: #{tg_user.wallet_address.present? ? tg_user.wallet_address : '<a href="/enter_wallet">Not Added, Click here to add</a>'}\n" \
+                  "<b>Total Earnings</b>: #{tg_user.total_earning.present? ? tg_user.total_earning : 'Not Available'}"
+
+        send_message(chat_id,profile_message)
       else
-        send_message(chat_id, "Command not recognized. Use /tasks to see available tasks. /tasks_history to see tasks history.")
+        welcome_message = <<~TEXT
+        Command Not Recognised
+        
+        Here are the available commands you can use:
+        
+        - <b>/tasks</b>: View the list of available tasks.
+        - <b>/tasks_history</b>: View your task completion history.
+        - <b>/enter_wallet</b>: Add or update your wallet address.
+        - <b>/profile</b>: View your profile details, including wallet address and total earnings.
+        
+        Feel free to explore the commands above!
+        TEXT
+        send_message(chat_id,welcome_message)
       end
     elsif callback_query
       process_callback_query(callback_query)
@@ -44,14 +98,27 @@ class TelegramWebhooksController < ApplicationController
   
   private
 
+  def send_wallet_input_options(chat_id)
+    # Create a custom keyboard with predefined options
+    keyboard = Telegram::Bot::Types::ReplyKeyboardMarkup.new(
+      keyboard: [
+        [Telegram::Bot::Types::KeyboardButton.new(text: 'Send Wallet Address')],
+        [Telegram::Bot::Types::KeyboardButton.new(text: 'Cancel')]
+      ],
+      one_time_keyboard: true,  # Hide keyboard after user picks an option
+      resize_keyboard: true      # Fit the keyboard size to screen
+    )
+  
+    send_message_markup(chat_id, "Please choose an option:", keyboard)
+  end
+
   def list_tasks(user)
     tasks = TgTask.active.where("tg_tasks.start_time <= ? and tg_tasks.end_time >= ?",Time.zone.now,Time.zone.now)
     if tasks.any?
       tasks.each do |task|
         message = "<b>Task: #{task.name}</b>\n" \
                   "Description: #{task.description}\n" \
-                  "Cost: $#{task.cost}\n" \
-                  "Status: #{task.status}\n" \
+                  "Reward: $#{task.cost}\n" \
                   "Submission Type: #{task.submission_type}\n" \
                   "Start Time: #{task.start_time}\n" \
                   "End Time: #{task.end_time}\n"
@@ -72,6 +139,10 @@ class TelegramWebhooksController < ApplicationController
             Telegram::Bot::Types::InlineKeyboardButton.new(
               text: "Complete Task #{task.name}",
               callback_data: "complete_task_#{task.id}"
+            ),
+            Telegram::Bot::Types::InlineKeyboardButton.new(
+              text: "View Complete Details",
+              callback_data: "view_task_#{task.id}"
             )
           ]
         ]
@@ -96,25 +167,33 @@ class TelegramWebhooksController < ApplicationController
         send_message(chat_id, "Task not found.")
       end
     end
-    
-  end
 
-  def old_process_callback_query(callback_query)
-    callback_data = callback_query['data']
-    chat_id = callback_query['message']['chat']['id']
-
-    if callback_data.start_with?('complete_task_')
+    if callback_data.start_with?('view_task_')
       task_id = callback_data.split('_').last.to_i
       tg_user = TgUser.find_by(chat_id: chat_id)
 
       task = TgTask.find_by(id: task_id)
-      if task
-        ask_for_submission_details(tg_user, task)  # Ask for details based on task type
-      else
-        send_message(chat_id, "Task not found.")
+      if task && tg_user
+        message = "<b>Task: #{task.name}</b>\n" \
+                  "Description: #{task.description}\n" \
+                  "Reward: $#{task.cost}\n" \
+                  "Submission Type: #{task.submission_type}\n" \
+                  "Start Time: #{task.start_time}\n" \
+                  "End Time: #{task.end_time}\n \n Below are the attached images/videos for your reference"
+        send_message(chat_id,message)
+        # task.links.each do |link|
+        #   file_url = get_file_url_from_telegram(link)
+        #   if file_url
+        #     Telegram::Bot::Client.run(@token_key) do |bot|
+        #       bot.api.send_video(chat_id: chat_id, video: file_url)
+        #     end
+        #   end
+        # end
       end
     end
+    
   end
+
 
   def ask_for_submission_details(user, task)
     # Prompt for the first piece of information: description
@@ -175,7 +254,7 @@ class TelegramWebhooksController < ApplicationController
   def send_message(chat_id, text)
     Telegram::Bot::Client.run(@token_key) do |bot|
       bot_response = bot.api.send_message(chat_id: chat_id, text: text, parse_mode: 'HTML')
-      return bot_response # Return the bot response to get the message_id
+      return bot_response&.message_id # Return the bot response to get the message_id
     end
   end
 
@@ -198,5 +277,32 @@ class TelegramWebhooksController < ApplicationController
     )
 
     send_message_markup(chat_id, "Click the button below to open:", keyboard)
+  end
+end
+
+private
+
+def get_file_url_from_telegram(file_id)
+  begin
+    uri = URI("https://api.telegram.org/bot#{@token_key}/getFile?file_id=#{file_id}")
+    
+    response = Net::HTTP.get(uri)
+    
+    file_info = JSON.parse(response)
+    
+    if file_info['ok']
+      file_path = file_info['result']['file_path']
+      if file_path
+        file_url = "https://api.telegram.org/file/bot#{@token_key}/#{file_path}"
+        file_url
+      else
+        nil
+      end
+    else
+      nil
+    end
+  rescue StandardError => e
+    logger.error "Error fetching file path: #{e.message}"
+    nil
   end
 end

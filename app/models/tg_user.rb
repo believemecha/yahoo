@@ -2,6 +2,8 @@ class TgUser < ApplicationRecord
 
   before_create :generate_code_number
 
+  has_many :tg_task_submissions
+  
   private
 
   def generate_code_number

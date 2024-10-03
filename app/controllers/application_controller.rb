@@ -9,7 +9,7 @@ class ApplicationController < ActionController::Base
     before_action :set_details
 
     def after_sign_in_path_for(resource)
-        current_user.admin? ? develop_dashboard_index_path : '/home'
+        "/"
     end
   
     def authenticate_admin_user!
@@ -29,7 +29,7 @@ class ApplicationController < ActionController::Base
       @token_key = "8089330080:AAF9axFl5p31fcuHoCXujAQE91UICSRM86I"
       @base_url = "https://tgapp-new.onrender.com"
       if Rails.env.development?
-        @base_url = "https://429a-150-242-60-196.ngrok-free.app"
+        @base_url = "https://bca0-150-242-86-79.ngrok-free.app"
       end
     end
   end

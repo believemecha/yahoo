@@ -2,6 +2,7 @@
 class TasksController < ApplicationController
   before_action :set_task, only: [:show, :edit, :update,:create_or_edit,:new,:add_files]
 
+  before_action :verify_access, except: [:complete_task,:submitted_tasks,:tasks_history,:update_complete_task]
   require 'telegram/bot'
 
   def index
@@ -221,16 +222,23 @@ class TasksController < ApplicationController
 
     return render json: {status: false, message: "Invalid Submission Id"} unless @submission.present?
 
+    @task = @submission.tg_task
+
     if toogle_type == "rating"
       final_status = @submission.approved? ? "pending" : "approved" 
       if @submission.update(status: final_status)
+        total_amount = @submission.tg_user.tg_task_submissions.approved.pluck(:earning).compact.sum
+        @submission.tg_user.update_columns(total_earning: total_amount)
         return render json: {status: true, message: "Updated Successfully"}
       else
         return render json: {status: false, message: "Something Went Wrong"}
       end
     elsif toogle_type == "payment"
       final_paid = !@submission.is_paid
-      if @submission.update(is_paid: final_paid)
+      amount =  final_paid ? @task.cost : nil
+      if @submission.update(is_paid: final_paid,earning: amount)
+        total_amount = @submission.tg_user.tg_task_submissions.approved.pluck(:earning).compact.sum
+        @submission.tg_user.update_columns(total_earning: total_amount)
         return render json: {status: true, message: "Updated Successfully"}
       else
         return render json: {status: false, message: "Something Went Wrong"}
@@ -241,7 +249,6 @@ class TasksController < ApplicationController
   end
 
   
-
   private
 
   def set_task
@@ -269,5 +276,9 @@ class TasksController < ApplicationController
       logger.error "Error fetching file path: #{e.message}"
       nil
     end
+  end
+
+  def verify_access
+    redirect_to "/users/sign_in" unless current_user.present?
   end
 end

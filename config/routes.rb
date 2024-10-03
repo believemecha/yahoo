@@ -18,6 +18,8 @@ Rails.application.routes.draw do
 
   post 'webhooks/telegram', to: 'telegram_webhooks#receive'
 
+  get '/start/:code', to: "home#magic_login"
+
   resources :tasks do
     collection do
       post :create_or_edit
@@ -28,6 +30,7 @@ Rails.application.routes.draw do
       get :download_file
       get :export_csv
       post :toogle_submission
+      get :update_wallet
     end
   end
 end

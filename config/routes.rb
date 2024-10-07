@@ -35,6 +35,8 @@ Rails.application.routes.draw do
       get :update_wallet
       get :profile
       get :users
+      post :bulk_toggle_payment
+      post :bulk_change_status
     end
   end
 end

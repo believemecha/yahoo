@@ -169,6 +169,12 @@ class TelegramWebhooksController < ApplicationController
       tg_user = TgUser.find_by(chat_id: chat_id)
 
       task = TgTask.find_by(id: task_id)
+
+      if !task.is_available
+        send_message(chat_id, "This Task is not avaiable. Click /tasks to see avaiable tasks")
+        return
+      end
+
       if task && tg_user
         url = @base_url + "/submitted_tasks?user_code=#{tg_user.code}&task_code=#{task.code}"
         send_web_app_link("Click here to Complete",chat_id,url)
@@ -182,6 +188,12 @@ class TelegramWebhooksController < ApplicationController
       tg_user = TgUser.find_by(chat_id: chat_id)
 
       task = TgTask.find_by(id: task_id)
+
+      if !task.is_available
+        send_message(chat_id, "This Task is not avaiable. Click /tasks to see avaiable tasks")
+        return
+      end
+
       if task && tg_user
         message = "<b>Task: #{task.name}</b>\n" \
                   "Description: #{task.description}\n" \

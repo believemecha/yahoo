@@ -86,6 +86,22 @@ class TasksController < ApplicationController
       @task = TgTask.find_by(id: params[:task_id])
       @submissions = @submissions.where(tg_task_id: @task.try(:id))
     end
+
+    if params[:paid].present?
+      @submissions = @submissions.where(is_paid: ActiveModel::Type::Boolean.new.cast(params[:paid]))
+    end
+  
+    # Filter by status
+    if params[:status].present?
+      @submissions = @submissions.where(status: params[:status])
+    end
+  
+    # Filter by user_id
+    if params[:user_id].present?
+      @submissions = @submissions.where(tg_user_id: params[:user_id])
+    end
+
+    @submissions = @submissions.page(params[:page] || 1).per(50)
   end
 
   def old_upload_file_to_telegram(file,chat_id = nil)
@@ -160,6 +176,7 @@ class TasksController < ApplicationController
 
   def users
     @users = TgUser.order(created_at: :desc)
+    @users = @users.page(params[:page] || 1).per(50)
   end
 
   def update_complete_task
@@ -271,6 +288,56 @@ class TasksController < ApplicationController
       render json: {status: false, message: "Invalid Action"}
     end
   end
+
+  def bulk_change_status
+    submission_ids = params[:submission_ids]
+    new_status = params[:new_status]
+  
+    submissions = TgTaskSubmission.where(id: submission_ids)
+  
+    if submissions.empty?
+      return render json: { status: false, message: "No valid submissions found." }
+    end
+    
+    ids = []
+    submissions.each do |submission|
+      if submission.update(status: new_status)
+        ids << submission.tg_user_id
+      end
+    end
+
+    TgTaskSubmission.where(tg_user_id: ids,is_paid: true).group(:tg_user).sum(:earning).each do |user_id,amount|
+      TgUser.where(id: user_id).update(total_earning: amount)
+    end
+    
+  
+    render json: { status: true, message: "Bulk status change completed successfully." }
+  end
+  
+  def bulk_toggle_payment
+    submission_ids = params[:submission_ids]
+  
+    submissions = TgTaskSubmission.where(id: submission_ids)
+  
+    if submissions.empty?
+      return render json: { status: false, message: "No valid submissions found." }
+    end
+    
+    ids = []
+
+    submissions.each do |submission|
+      if submission.update(is_paid: !submission.is_paid)
+        ids << submission.tg_user_id
+      end
+    end
+
+    TgTaskSubmission.where(tg_user_id: ids,is_paid: true).group(:tg_user).sum(:earning).each do |user_id,amount|
+      TgUser.where(id: user_id).update(total_earning: amount)
+    end
+  
+    render json: { status: true, message: "Bulk payment toggle completed successfully." }
+  end
+  
 
   
   private

@@ -31,6 +31,10 @@ class TgTask < ApplicationRecord
     links.map {|file_id| base_url + "/tasks/download_file?file_id=#{file_id}"}
   end
 
+  def is_available
+    (start_time.present? && Time.zone.now >= start_time) && (end_time.present? && Time.zone.now <= end_time)
+  end
+
   private
 
   def generate_code_number

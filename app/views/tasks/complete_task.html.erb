@@ -1,3 +1,7 @@
+
+<%if !@task.is_available%>
+  Task is not Available to Submit. Please choose other tasks from the bot.
+<%else%>
 <!-- app/views/tasks/complete_task.html.erb -->
 
 <h1><%= @is_new_submission ? 'Submit Task' : 'Edit Task' %></h1>
@@ -62,3 +66,4 @@
     .catch(error => console.error('Error:', error));
   }
 </script>
+<%end%>

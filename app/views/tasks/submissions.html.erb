@@ -1,28 +1,85 @@
 <h1>TgTask Submissions</h1>
-<%if @task.present?%>
-    <h4>Showing Submissions for Task: <b>(<%=@task.name%>):<%=@task.id%></b> </h4>
-<%end%>
+<% if @task.present? %>
+  <h4>Showing Submissions for Task: <b>(<%= @task.name %>): <%= @task.id %></b></h4>
+<% end %>
+
+
+<!-- Filter Form -->
+<div class="my-3 rounded border-primary">
+  <form method="get" action="<%= request.path %>">
+    <div class="row">
+      <!-- Paid/Unpaid Filter -->
+      <div class="col-md-6">
+        <label for="filter_paid" class="form-label">Paid/Unpaid</label>
+        <select name="paid" id="filter_paid" class="form-select">
+          <option value="">All</option>
+          <option value="true" <%= 'selected' if params[:paid] == "true" %>>Paid</option>
+          <option value="false" <%= 'selected' if params[:paid] == "false" %>>Unpaid</option>
+        </select>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="col-md-6">
+        <label for="filter_status" class="form-label">Status</label>
+        <select name="status" id="filter_status" class="form-select">
+          <option value="">All</option>
+          <% TgTaskSubmission.statuses.keys.each do |status| %>
+            <option value="<%= status %>" <%= 'selected' if params[:status] == status %>><%= status.capitalize %></option>
+          <% end %>
+        </select>
+      </div>
+
+      <!-- User ID Filter -->
+      <div class="col-md-6">
+        <label for="filter_user_id" class="form-label">User ID</label>
+        <input type="text" name="user_id" id="filter_user_id" class="form-control" value="<%= params[:user_id] %>">
+      </div>
+
+      <div class="col-md-6">
+        <label for="filter_task_id" class="form-label">Task ID</label>
+        <input type="text" name="task_id" id="filter_task_id" class="form-control" value="<%= params[:task_id] %>">
+      </div>
+
+
+      <!-- Submit Button -->
+      <div class="col-md-6">
+        <label class="form-label">&nbsp;</label>
+        <button type="submit" class="btn btn-primary d-block">Filter</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+
+<div>
+  <button id="bulkStatusChangeBtn" class="btn btn-warning" onclick="bulkStatusChange()">Bulk Change Status</button>
+  <button id="bulkPaymentToggleBtn" class="btn btn-danger" onclick="bulkPaymentToggle()">Bulk Toggle Payment Status</button>
+</div>
+
 <table class="table">
   <thead>
     <tr>
+      <th>Select <input type="checkbox" id="checkall" onclick="toggleAll(this)"></th>
       <th>User Id</th>
       <th>Submission Id</th>
       <th>Task Id</th>
       <th>User</th>
+      <th>User Wallet Address</th>
       <th>Description</th>
       <th>Status</th>
       <th>Uploaded Files</th>
       <th>Is Paid</th>
-      <th>Rate</th>
     </tr>
   </thead>
   <tbody>
     <% @submissions.each do |submission| %>
       <tr>
-        <td><%=submission.tg_user.id%></td>
+        <th><input type="checkbox" class="submission-checkbox" data-id="<%= submission.id %>"></th>
+        <td><%= submission.tg_user.id %></td>
         <td><%= submission.id %></td>
         <td><%= submission.tg_task_id %></td>
-        <td><%= submission.tg_user.name if submission.tg_user_id %>: <%=submission.tg_user_id%></td>
+        <td><%= submission.tg_user.try(:name) if submission.tg_user_id %></td>
+        <td><%=submission.tg_user.try(:wallet_address) || "NA"%></td>
         <td><%= submission.description %></td>
         <td><%= submission.status %></td>
         <td>
@@ -34,46 +91,141 @@
           </ol>
         </td>
         <td>
-          <div class="btn btn-sm btn-primary <%= submission.is_paid ? "btn-success" : ""%>" onclick="toogleData(this,'<%=submission.code%>','payment')">
-            <%= submission.is_paid ? "Mark Unpaid" : "Mark Paid" %>
+          <div class="btn btn-sm <%= submission.is_paid ? 'btn-success' : 'btn-primary' %>" onclick="toogleData(this,'<%= submission.code %>','payment')">
+            <%= submission.is_paid ? 'Paid' : 'Unpaid' %>
           </div>
         </td>
-        <td>
-          <div class="btn btn-sm btn-primary <%= submission.approved? ? "btn-success" : ""%>" onclick="toogleData(this,'<%=submission.code%>','rating')">
-            <%= submission.approved? ? "Approved" : "Approve" %>
-          </div>          
-        </td>
-
       </tr>
     <% end %>
   </tbody>
 </table>
 
-<%= link_to 'Back to Tasks', tasks_path, class: 'btn btn-secondary' %>
+<%= paginate @submissions %>
+
+
+<%= link_to 'Back to Tasks', tasks_path, class: 'btn btn-secondary mb-3' %>
 
 <script>
-  function toogleData(selector,code,toogle_type){
-    const formData = new FormData;
-    formData.append("submission_code",code);
-    formData.append("toogle_type",toogle_type);
+  function toggleAll(source) {
+    const checkboxes = document.querySelectorAll('.submission-checkbox');
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = source.checked;
+    });
+  }
 
-    fetch("/tasks/toogle_submission", {
-      method: "POST",
-      body: formData,
-      headers: {
-        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+  function bulkStatusChange() {
+    const selectedSubmissions = [];
+    const checkboxes = document.querySelectorAll('.submission-checkbox:checked');
+
+    checkboxes.forEach(checkbox => {
+      selectedSubmissions.push(checkbox.dataset.id);
+    });
+
+    if (selectedSubmissions.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        text: "No submissions selected!"
+      });
+      return;
+    }
+
+    // Prompt for new status
+    Swal.fire({
+      title: "Bulk Change Status",
+      input: "select",
+      inputOptions: {
+        approved: "Approved",
+        pending: "Pending",
+        rejected: "Rejected"
+      },
+      inputPlaceholder: "Select Status",
+      showCancelButton: true,
+      confirmButtonText: "Change Status"
+    }).then(result => {
+      if (result.isConfirmed) {
+        const newStatus = result.value;
+        performBulkStatusChange(selectedSubmissions, newStatus);
       }
+    });
+  }
+
+  function performBulkStatusChange(submissionIds, newStatus) {
+    fetch("/tasks/bulk_change_status", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+      },
+      body: JSON.stringify({ submission_ids: submissionIds, new_status: newStatus })
     })
     .then(response => response.json())
     .then(data => {
       Swal.fire({
         icon: data.status ? "success" : "error",
         text: data.message
-      }).then(()=>{
-          if(data.status){
-            window.location.reload();
-          }
-      })
+      }).then(() => {
+        if (data.status) {
+          window.location.reload();
+        }
+      });
+    })
+    .catch(error => console.error('Error:', error));
+  }
+
+  function bulkPaymentToggle() {
+    const selectedSubmissions = [];
+    const checkboxes = document.querySelectorAll('.submission-checkbox:checked');
+
+    checkboxes.forEach(checkbox => {
+      selectedSubmissions.push(checkbox.dataset.id);
+    });
+
+    if (selectedSubmissions.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        text: "No submissions selected!"
+      });
+      return;
+    }
+
+    // Prompt for payment status
+    Swal.fire({
+      title: "Bulk Toggle Payment Status",
+      input: "select",
+      inputOptions: {
+        paid: "Paid",
+        unpaid: "Not Paid"
+      },
+      inputPlaceholder: "Select Payment Status",
+      showCancelButton: true,
+      confirmButtonText: "Toggle Payment Status"
+    }).then(result => {
+      if (result.isConfirmed) {
+        const paymentStatus = result.value === "paid"; // true if "Paid", false if "Not Paid"
+        performBulkPaymentToggle(selectedSubmissions, paymentStatus);
+      }
+    });
+  }
+
+  function performBulkPaymentToggle(submissionIds, isPaid) {
+    fetch("/tasks/bulk_toggle_payment", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+      },
+      body: JSON.stringify({ submission_ids: submissionIds, is_paid: isPaid })
+    })
+    .then(response => response.json())
+    .then(data => {
+      Swal.fire({
+        icon: data.status ? "success" : "error",
+        text: data.message
+      }).then(() => {
+        if (data.status) {
+          window.location.reload();
+        }
+      });
     })
     .catch(error => console.error('Error:', error));
   }

@@ -1,3 +1,8 @@
+<style>
+    .pagination.page{
+        margin: 10px !important;
+    }
+</style>
 <div class="container mt-4">
   <div class="row">
     <div class="col-12">
@@ -9,6 +14,7 @@
               <th>User Id</th>  
               <th>Name</th>
               <th>Chat ID</th>
+              <th>Wallet Address</th>
               <th>Total Earning</th>
               <th>Registration Date</th>
             </tr>
@@ -19,6 +25,7 @@
                 <td><%= user.id %></td>
                 <td><%= user.name %></td>
                 <td><%= user.chat_id %></td>
+                <td><%= user.wallet_address || "NA" %></td>
                 <td><%= number_to_currency(user.total_earning, unit: "$") %></td>
                 <td><%= user.created_at.strftime("%d-%m-%Y %H:%M") %></td>
               </tr>
@@ -30,6 +37,9 @@
           No users found.
         </div>
       <% end %>
+    </div>
+    <div class="container">
+        <%= paginate @users %>
     </div>
   </div>
 </div>

@@ -1,0 +1,32 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-4">Task Submissions for <%= @user.name %></h2>
+      <% if @task_submissions.any? %>
+        <table class="table table-bordered table-striped table-responsive-md">
+          <thead class="thead-dark">
+            <tr>
+              <th>Task Name</th>
+              <th>Earning</th>
+              <th>Submission Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @task_submissions.each do |submission| %>
+              <% task = TgTask.find_by(id: submission.tg_task_id) %>
+              <tr>
+                <td><%= task.name %></td>
+                <td><%= number_to_currency(submission.earning, unit: "$") %></td>
+                <td><%= submission.created_at.strftime("%d-%m-%Y %H:%M") %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <div class="alert alert-warning" role="alert">
+          No task submissions found.
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -2,7 +2,7 @@
 class TasksController < ApplicationController
   before_action :set_task, only: [:show, :edit, :update,:create_or_edit,:new,:add_files]
 
-  before_action :verify_access, except: [:complete_task,:submitted_tasks,:tasks_history,:update_complete_task]
+  before_action :verify_access, except: [:complete_task,:submitted_tasks,:tasks_history,:update_complete_task,:profile]
   require 'telegram/bot'
 
   def index
@@ -137,6 +137,12 @@ class TasksController < ApplicationController
     return render json: {success: false, message: "Invalid Request"} unless @user.present?
     
     @tasks = TgTask.joins(:tg_task_submissions).where(tg_task_submissions: {tg_user_id: @user.id}).distinct
+  end
+
+  def profile
+    @user = TgUser.find_by(code: params[:user_code])
+    return render json: {success: false, message: "Invalid Request"} unless @user.present?
+    @task_submissions = TgTaskSubmission.where(tg_user_id: @user.id,is_paid: true)
   end
 
   def update_complete_task

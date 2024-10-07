@@ -20,6 +20,8 @@ Rails.application.routes.draw do
 
   get '/start/:code', to: "home#magic_login"
 
+  get "/profile", to: "tasks#profile"
+
   resources :tasks do
     collection do
       post :create_or_edit
@@ -31,6 +33,7 @@ Rails.application.routes.draw do
       get :export_csv
       post :toogle_submission
       get :update_wallet
+      get :profile
     end
   end
 end

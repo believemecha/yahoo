@@ -4,7 +4,7 @@ class TelegramWebhooksController < ApplicationController
 
   def receive
     message = params['message']
-
+    
     callback_query = params['callback_query']
   
     if message
@@ -25,7 +25,14 @@ class TelegramWebhooksController < ApplicationController
   
       text = message['text']
 
+
       if reply_to_message_id.present? && tg_user.wallet_message_id == reply_to_message_id.to_i
+        tg_user.update_columns(wallet_address: text)
+        send_message(chat_id,"Wallet Updated Successfully to Address: <b>#{tg_user.reload.wallet_address}</b>")
+        return head :ok
+      end
+
+      if message["message_id"].to_i  == tg_user.wallet_message_id + 1
         tg_user.update_columns(wallet_address: text)
         send_message(chat_id,"Wallet Updated Successfully to Address: <b>#{tg_user.reload.wallet_address}</b>")
         return head :ok
@@ -74,6 +81,8 @@ class TelegramWebhooksController < ApplicationController
                   "<b>Total Earnings</b>: #{tg_user.total_earning.present? ? tg_user.total_earning : 'Not Available'}"
 
         send_message(chat_id,profile_message)
+        url = "#{@base_url}/profile?user_code=#{tg_user.code}"
+        send_web_app_link("Click To View Payment History",chat_id,url)
       else
         welcome_message = <<~TEXT
         Command Not Recognised

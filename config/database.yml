@@ -24,7 +24,7 @@ default: &default
 development:
   <<: *default
   database: :cristy_emails_development
-  url: 'postgresql://lbms_mecha_db_user:CHgisqMnAFj7Ir4kLjU9cDR5oTFtmnKZ@dpg-crlr7e5umphs73ebt0l0-a.oregon-postgres.render.com/lbms_mecha_db'
+  # url: 'postgresql://lbms_mecha_db_user:CHgisqMnAFj7Ir4kLjU9cDR5oTFtmnKZ@dpg-crlr7e5umphs73ebt0l0-a.oregon-postgres.render.com/lbms_mecha_db'
   # url: 'postgres://lbmsdb_user:93nS9gi9Z3UgrKiMVBQOMzNGkaAFsMoo@dpg-cp5khr0cmk4c73f3rs9g-a.oregon-postgres.render.com/lbmsdb'
 
   # The specified database role being used to connect to postgres.

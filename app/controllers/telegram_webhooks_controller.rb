@@ -190,14 +190,9 @@ class TelegramWebhooksController < ApplicationController
                   "Start Time: #{task.start_time}\n" \
                   "End Time: #{task.end_time}\n \n Below are the attached images/videos for your reference"
         send_message(chat_id,message)
-        # task.links.each do |link|
-        #   file_url = get_file_url_from_telegram(link)
-        #   if file_url
-        #     Telegram::Bot::Client.run(@token_key) do |bot|
-        #       bot.api.send_video(chat_id: chat_id, video: file_url)
-        #     end
-        #   end
-        # end
+        task.links.each do |file_id|
+          send_document_with_file_id(file_id,chat_id)
+        end
       end
     end
     
@@ -314,4 +309,14 @@ def get_file_url_from_telegram(file_id)
     logger.error "Error fetching file path: #{e.message}"
     nil
   end
+end
+
+def send_document_with_file_id(file_id, chat_id)
+  Telegram::Bot::Client.run(@token_key) do |bot|
+    # Directly send the document using the existing file_id
+    response = bot.api.send_document(chat_id: chat_id, document: file_id)
+    return response if response.present?
+  end
+
+  nil
 end

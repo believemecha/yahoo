@@ -34,6 +34,7 @@ Rails.application.routes.draw do
       post :toogle_submission
       get :update_wallet
       get :profile
+      get :users
     end
   end
 end

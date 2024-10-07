@@ -27,6 +27,10 @@ class TgTask < ApplicationRecord
 
   before_create :generate_code_number
 
+  def urls(base_url)
+    links.map {|file_id| base_url + "/tasks/download_file?file_id=#{file_id}"}
+  end
+
   private
 
   def generate_code_number

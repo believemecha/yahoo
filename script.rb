@@ -132,8 +132,16 @@ end
 require 'telegram/bot'
 
 def set_telegram_webhook
-  @token_key = "8089330080:AAF9axFl5p31fcuHoCXujAQE91UICSRM86I"
-  webhook_url = "https://tg-mini-ruby.onrender.com/webhooks/telegram"
+  # @token_key = "8089330080:AAF9axFl5p31fcuHoCXujAQE91UICSRM86I"
+
+  @token_key = "7833696942:AAHFl9xnJ98zrDfp_n5-kIDvAnXlTf0reVM"
+
+  @base_url = "https://tgapp-new.onrender.com"
+  if Rails.env.development?
+    @base_url = "https://13e9-103-240-235-244.ngrok-free.app"
+  end
+
+  webhook_url = "#{@base_url}/webhooks/telegram"
 
   Telegram::Bot::Client.run(@token_key ) do |bot|
     response = bot.api.set_webhook(url: webhook_url)

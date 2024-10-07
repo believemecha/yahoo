@@ -2,6 +2,11 @@
 <h1>Tasks</h1>
 <%= link_to 'New Task', new_task_path, class: 'btn btn-primary' %>
 
+<%= link_to 'Users List', "/tasks/users", class: 'btn btn-warning' %>
+
+
+<%= link_to 'All Submissions', "/tasks/submissions", class: 'btn btn-success' %>
+
 <table class="table table-striped mt-2">
   <thead>
     <tr>
@@ -26,7 +31,14 @@
         <td><%= task.name %></td>
         <td><%= task.description.truncate(50) %></td>
         <td><span style="font-size: 12px;"><%= task.start_time %> <br> <%= task.end_time %></span></td>
-        <td><a href="/tasks/add_files?id=<%=task.id%>" target="_blank"><%= task.links.length %> Uploaded </a></td>
+        <td>
+          <a href="/tasks/add_files?id=<%=task.id%>" target="_blank"><%= task.links.length %> Uploaded </a>
+          <ol>
+            <%task.urls(@base_url).each_with_index do |x,index|%>
+              <li><a href="<%=x%>" target="_blank"><%=index + 1%> File</a></li>
+            <%end%>
+          </ol>
+          </td>
         <td><%= task.cost %></td>
         <td><%= task.status %></td>
         <td><%= task.maximum_per_user %></td>

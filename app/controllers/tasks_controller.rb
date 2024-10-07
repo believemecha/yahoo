@@ -88,7 +88,7 @@ class TasksController < ApplicationController
     end
   end
 
-  def upload_file_to_telegram(file,chat_id = nil)
+  def old_upload_file_to_telegram(file,chat_id = nil)
     Telegram::Bot::Client.run(@token_key) do |bot|
       chat_id = chat_id || 954015423
   
@@ -103,7 +103,20 @@ class TasksController < ApplicationController
       end
     end
     nil
-  end  
+  end 
+  
+  def upload_file_to_telegram(file, chat_id = nil)
+    Telegram::Bot::Client.run(@token_key) do |bot|
+      chat_id = chat_id || 954015423
+  
+      if file.present?
+        # Send file as a document to avoid compression
+        response = bot.api.send_document(chat_id: chat_id, document: Faraday::UploadIO.new(file.path, file.content_type))
+        return response[:document]&.file_id if response.present?
+      end
+    end
+    nil
+  end
 
   def complete_task
     @task = TgTask.find_by(code: params[:task_code])
@@ -143,6 +156,10 @@ class TasksController < ApplicationController
     @user = TgUser.find_by(code: params[:user_code])
     return render json: {success: false, message: "Invalid Request"} unless @user.present?
     @task_submissions = TgTaskSubmission.where(tg_user_id: @user.id,is_paid: true)
+  end
+
+  def users
+    @users = TgUser.order(created_at: :desc)
   end
 
   def update_complete_task
@@ -208,9 +225,9 @@ class TasksController < ApplicationController
 
   def download_file
     file_id = params[:file_id]
-
+  
     file_path = get_file_path_from_telegram(file_id)
-
+  
     if file_path
       file_url = "https://api.telegram.org/file/bot#{@token_key}/#{file_path}"
 
@@ -219,6 +236,7 @@ class TasksController < ApplicationController
       render plain: "File not found", status: :not_found
     end
   end
+  
 
   def toogle_submission
     submission_code = params[:submission_code]

@@ -24,6 +24,10 @@ class TgTaskSubmission < ApplicationRecord
     uploaded_files.map {|file_id| base_url + "/tasks/download_file?file_id=#{file_id}"}.join(" , ")
   end
 
+  def urls(base_url)
+    uploaded_files.map {|file_id| base_url + "/tasks/download_file?file_id=#{file_id}"}
+  end
+
 
   private
 

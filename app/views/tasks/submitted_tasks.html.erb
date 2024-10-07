@@ -26,4 +26,8 @@
   </div>
 </div>
 
+<%if @task.maximum_per_user.present? && (@submissions.length >= @task.maximum_per_user.to_i)%>
+  Maximum Submissions for this task reached.
+<%else%>
 <%= link_to 'Add New Submission', "/complete_task?user_code=#{@user.code}&task_code=#{@task.code}", class: 'btn btn-secondary mt-3 mb-5' %>
+<%end%>

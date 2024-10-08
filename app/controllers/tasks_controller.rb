@@ -337,6 +337,31 @@ class TasksController < ApplicationController
   
     render json: { status: true, message: "Bulk payment toggle completed successfully." }
   end
+
+  def task_details
+    @task_details = TgTaskDetail.where(tg_task_id: params[:id]).order(created_at: :desc)
+  end
+
+  def update_task_details
+    task = TgTask.find_by(id: params[:id])
+    deletable_ids = params[:deletable_ids]
+    (params[:tg_task_details] || []).each do |task_detail_params|
+      if task_detail_params[:id].present?
+        task_detail = TgTaskDetail.find(task_detail_params[:id])
+        if task_detail.update(details:task_detail_params[:details] )
+        else
+        end
+      else
+        TgTaskDetail.create(tg_task_id: task.id,details:task_detail_params[:details])
+      end
+    end
+
+    TgTaskDetail.where(id: deletable_ids).delete_all
+  
+    render json: { status: 'success', message: 'Task details updated successfully.' }
+  rescue => e
+    render json: { status: 'error', message: e.message }, status: :unprocessable_entity
+  end
   
 
   
@@ -347,7 +372,7 @@ class TasksController < ApplicationController
   end
 
   def task_params
-    params.require(:tg_task).permit(:cost, :name, :description, :status, :submission_type, :start_time, :end_time, :maximum_per_user,:minimum_gap_in_hours)
+    params.require(:tg_task).permit(:cost, :name, :description, :status, :submission_type, :start_time, :end_time, :maximum_per_user,:minimum_gap_in_hours,:is_private)
   end
 
   def get_file_path_from_telegram(file_id)

@@ -13,6 +13,7 @@
       <th>Id</th>
       <th>Name</th>
       <th>Description</th>
+      <th>Is Private</th>
       <th>TimeLine</th>
       <th>Videos/Images</th>
       <th>Cost</th>
@@ -30,6 +31,10 @@
         <td><%= task.id %></td>
         <td><%= task.name %></td>
         <td><%= task.description.truncate(50) %></td>
+        <td>
+          <%=task.is_private ? "Yes": "NO"%>
+          <%= link_to 'Private details', task_details_task_path(id: task.id), class: 'btn btn-warning'  if task.is_private%>
+        </td>
         <td><span style="font-size: 12px;"><%= task.start_time %> <br> <%= task.end_time %></span></td>
         <td>
           <a href="/tasks/add_files?id=<%=task.id%>" target="_blank"><%= task.links.length %> Uploaded </a>
@@ -49,11 +54,11 @@
         </td>
 
         <td>
-                            <%= link_to 'Submissions', submissions_tasks_path(task_id: task.id), class: 'btn btn-info mx-1' %>
+            <%= link_to 'Submissions', submissions_tasks_path(task_id: task.id), class: 'btn btn-info mx-1' %>
 
         </td>
         <td>
-                    <%= link_to 'Download', "/tasks/export_csv.csv?task_id=#{task.id}", class: 'btn btn-info mx-1' %>
+           <%= link_to 'Download', "/tasks/export_csv.csv?task_id=#{task.id}", class: 'btn btn-info mx-1' %>
         </td>
       </tr>
     <% end %>

@@ -1,0 +1,142 @@
+<div class="container mt-4">
+  <h3>Task Details</h3>
+  <form id="task-details-form" class="mb-4">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+         <th>Id</th>
+          <th>Assigned To User Id</th>
+          <th>Details</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="task-details-body">
+        <% @task_details.each_with_index do |task_detail, index| %>
+          <tr>
+            <td>
+             <input type="text" name="tg_task_details[<%= index %>][id]" value="<%= task_detail.id%>" readonly >
+            </td>
+            <td>
+              <input type="text" name="tg_task_details[<%= index %>][tg_user_id]" value="<%= task_detail.tg_user_id%>" class="form-control" readonly  placeholder="Unassigned">
+            </td>
+            <td>
+              <input type="text" name="tg_task_details[<%= index %>][details]" value="<%= task_detail.details %>" class="form-control">
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger remove-task-detail" id="<%=task_detail.id%>">Remove</button>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <button type="button" class="btn btn-primary" id="add-task-detail">Add Task Detail</button>
+    <button type="submit" class="btn btn-success">Save Changes</button>
+  </form>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const taskDetailsBody = document.getElementById('task-details-body');
+    const addTaskDetailButton = document.getElementById('add-task-detail');
+    const taskDetailsForm = document.getElementById('task-details-form');
+
+    const deletableIds = [];
+
+    let newRowIndex = <%= @task_details.size %>;  // Start index after existing rows
+
+    // Function to add a new row
+    addTaskDetailButton.addEventListener('click', function () {
+      const newRow = `
+        <tr>
+          <td>
+           New
+          </td>
+          <td>
+            <input type="text" name="tg_task_details[${newRowIndex}][tg_user_id]" class="form-control" placeholder="Will Auto Assign User Id" readonly >
+          </td>
+          <td>
+            <input type="text" name="tg_task_details[${newRowIndex}][details]" class="form-control" placeholder="Enter task details">
+          </td>
+          <td>
+            <button type="button" class="btn btn-danger remove-task-detail">Remove</button>
+          </td>
+        </tr>
+      `;
+      taskDetailsBody.insertAdjacentHTML('beforeend', newRow);
+      newRowIndex++;  // Increment the row index for the next new row
+    });
+
+    // Remove row
+    taskDetailsBody.addEventListener('click', function (event) {
+      if (event.target.classList.contains('remove-task-detail')) {
+        let deleted_one = event.target.id;
+        if(deleted_one){
+            deletableIds.push(deleted_one);
+        }
+        event.target.closest('tr').remove();
+      }
+    });
+
+    // Handle form submission
+    taskDetailsForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      
+      const formData = new FormData(taskDetailsForm);
+      const data = [];
+      let currentObject = {};
+
+      // Iterate over the form data
+      for (let [name, value] of formData.entries()) {
+        const fieldMatch = name.match(/\[(\d+)\]\[(\w+)\]/);  // Matches [index][field_name]
+
+        console.log(fieldMatch,"fieldMatch");
+        if (fieldMatch) {
+          const fieldIndex = fieldMatch[1];
+          const fieldName = fieldMatch[2];
+
+          if (!currentObject[fieldIndex]) {
+            currentObject[fieldIndex] = {};
+          }
+          console.log(fieldIndex,fieldName,value,"datatata");
+          currentObject[fieldIndex][fieldName] = value;
+        }
+      }
+
+      // Push the objects into the array
+      for (const index in currentObject) {
+        data.push(currentObject[index]);
+      }
+
+      console.log(data,"data");
+
+      fetch('/tasks/<%=params[:id]%>/update_task_details', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({ tg_task_details: data,deletable_ids: deletableIds })
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.status === 'success') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: result.message,
+            timer: 2000
+          }).then(()=>{
+            window.location.reload();
+          })
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: result.message
+          });
+        }
+      });
+    });
+  });
+</script>

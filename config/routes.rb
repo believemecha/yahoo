@@ -38,5 +38,9 @@ Rails.application.routes.draw do
       post :bulk_toggle_payment
       post :bulk_change_status
     end
+    member do 
+      get :task_details
+      post :update_task_details
+    end
   end
 end

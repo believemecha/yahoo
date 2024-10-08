@@ -141,24 +141,37 @@ class TelegramWebhooksController < ApplicationController
   end
 
   def send_task_buttons(chat_id, task)
+
+    show_join = task.is_private
+
     Telegram::Bot::Client.run(@token_key) do |bot|
+      buttons = [
+        Telegram::Bot::Types::InlineKeyboardButton.new(
+          text: "Complete Task #{task.name}",
+          callback_data: "complete_task_#{task.id}"
+        ),
+        Telegram::Bot::Types::InlineKeyboardButton.new(
+          text: "View Complete Details",
+          callback_data: "view_task_#{task.id}"
+        )
+      ]
+  
+      # Add the "Join Task" button only if show_join is true
+      if show_join
+        buttons << Telegram::Bot::Types::InlineKeyboardButton.new(
+          text: "Join Task",
+          callback_data: "join_task_#{task.id}"
+        )
+      end
+  
       keyboard = Telegram::Bot::Types::InlineKeyboardMarkup.new(
-        inline_keyboard: [
-          [
-            Telegram::Bot::Types::InlineKeyboardButton.new(
-              text: "Complete Task #{task.name}",
-              callback_data: "complete_task_#{task.id}"
-            ),
-            Telegram::Bot::Types::InlineKeyboardButton.new(
-              text: "View Complete Details",
-              callback_data: "view_task_#{task.id}"
-            )
-          ]
-        ]
+        inline_keyboard: [buttons]  # Wrap buttons inside an array
       )
-      bot.api.send_message(chat_id: chat_id, text: "Click to complete the task.", reply_markup: keyboard)
+  
+      bot.api.send_message(chat_id: chat_id, text: "Choose Below Options.", reply_markup: keyboard)
     end
   end
+  
 
   def process_callback_query(callback_query)
     callback_data = callback_query['data']
@@ -174,6 +187,15 @@ class TelegramWebhooksController < ApplicationController
         send_message(chat_id, "This Task is not avaiable. Click /tasks to see avaiable tasks")
         return
       end
+
+      if task.is_private
+        task_details = TgTaskDetail.find_by(tg_task_id: task.id,tg_user_id: tg_user.id)
+        if !task_details.present?
+          send_message(chat_id,"Please Join the Task First using the Join Task Button.")
+          return
+        end
+      end
+
 
       if task && tg_user
         url = @base_url + "/submitted_tasks?user_code=#{tg_user.code}&task_code=#{task.code}"
@@ -201,11 +223,50 @@ class TelegramWebhooksController < ApplicationController
                   "Submission Type: #{task.submission_type}\n" \
                   "Start Time: #{task.start_time}\n" \
                   "End Time: #{task.end_time}\n \n Below are the attached images/videos for your reference"
+        if task.is_private
+          task_details = TgTaskDetail.find_by(tg_task_id: task.id,tg_user_id: tg_user.id)
+          if !task_details.present?
+            send_message(chat_id,"Please Join the Task First using the Join Task Button.")
+            return
+          end
+          message = message + "\n \n" \
+                    "<b>Please use below information</b>\n" \
+                    "<b>#{task_details.details}</b>"
+        end          
         send_message(chat_id,message)
         task.links.each do |file_id|
           send_document_with_file_id(file_id,chat_id)
         end
       end
+    end
+
+    if callback_data.start_with?("join_task_")
+      task_id = callback_data.split('_').last.to_i
+      tg_user = TgUser.find_by(chat_id: chat_id)
+
+      task = TgTask.find_by(id: task_id)
+
+      if !task.is_available
+        send_message(chat_id, "This Task is not avaiable. Click /tasks to see avaiable tasks")
+        return
+      end
+
+      task_details = TgTaskDetail.find_by(tg_task_id: task.id,tg_user_id: tg_user.id)
+
+      if task_details.present?
+        send_message(chat_id,"You have already joined the task. Please View task details and complete the task by using Complete Task Button")
+        return
+      end
+
+      tdetails = TgTaskDetail.where(tg_task_id: task.id,tg_user_id: nil).first
+
+      if tdetails.present?
+        tdetails.update(tg_user_id: tg_user.id)
+      else
+        send_message(chat_id,"All Slots Filled for this. Please try after some time.")
+        return
+      end
+      send_message(chat_id,"You have joined the task. Please View task details and complete the task by using Complete Task Button")
     end
     
   end

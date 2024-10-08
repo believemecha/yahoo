@@ -14,6 +14,7 @@ class TgTaskSubmission < ApplicationRecord
 
   before_create :generate_code_number
 
+  after_commit :free_task_details
 
   # Add a method to check if submission has files
   def has_files?
@@ -38,6 +39,12 @@ class TgTaskSubmission < ApplicationRecord
       break @code unless TgTaskSubmission.exists?(code: @code)
     end
     self.code = @code
+  end
+
+  def free_task_details
+    if rejected?
+      task_details = TgTaskDetail.where(tg_task_id: tg_task_id,tg_user_id: tg_user_id).update_all(tg_user_id: nil)
+    end
   end
 
 end

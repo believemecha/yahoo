@@ -33,7 +33,7 @@
         <td><%= task.description.truncate(50) %></td>
         <td>
           <%=task.is_private ? "Yes": "NO"%>
-          <%= link_to 'Private details', task_details_task_path(id: task.id), class: 'btn btn-warning'  if task.is_private%>
+          <%= link_to 'Private details', task_details_task_path(id: task.id), class: 'btn btn-warning', target: "_blank"  if task.is_private%>
         </td>
         <td><span style="font-size: 12px;"><%= task.start_time %> <br> <%= task.end_time %></span></td>
         <td>

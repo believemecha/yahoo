@@ -40,7 +40,7 @@ class TelegramWebhooksController < ApplicationController
 
       if !tg_user.wallet_address.present?
         message = "<b> Please make sure you're familiar with crypto & the wallet address you entered is correct ,before you proceed.
-        </b>\n <b>Wallet Address is required before we proceed! </b>"
+        </b>\n <b>Wallet Address is required before we proceed! </b> \n <b>Minimum Widthdrawl $10 USD </b>"
         send_message(chat_id,message)
         wallet_message_id = send_message(chat_id,"Our default crypto is USDT, on network BEP20. Please reply to me on this message with the wallet address.")
         tg_user.update(wallet_message_id: wallet_message_id) if wallet_message_id.present?
@@ -60,7 +60,7 @@ class TelegramWebhooksController < ApplicationController
         - <b>/tasks_history</b>: View your task completion history.
         - <b>/enter_wallet</b>: Add or update your wallet address.
         - <b>/profile</b>: View your profile details, including wallet address and total earnings.
-        
+        - <b>/contact</b>: Contact Us.
         Feel free to explore the commands above!
       TEXT
       send_message(chat_id, welcome_message)
@@ -70,7 +70,7 @@ class TelegramWebhooksController < ApplicationController
         send_web_app_link("Click Here To View History",chat_id,url)
       when "/enter_wallet"
         message = "<b> Please make sure you're familiar with crypto & the wallet address you entered is correct ,before you proceed.
-        </b>"
+        </b> \n <b>Minimum Widthdrawl $10 USD </b>"
         send_message(chat_id,message)
         wallet_message_id = send_message(chat_id,"Our default crypto is USDT, on network BEP20. Please reply to me on this message with the wallet address.")
         tg_user.update(wallet_message_id: wallet_message_id) if wallet_message_id.present?
@@ -93,6 +93,7 @@ class TelegramWebhooksController < ApplicationController
         - <b>/tasks_history</b>: View your task completion history.
         - <b>/enter_wallet</b>: Add or update your wallet address.
         - <b>/profile</b>: View your profile details, including wallet address and total earnings.
+        - <b>/contact</b>: Contact Us.
         
         Feel free to explore the commands above!
         TEXT

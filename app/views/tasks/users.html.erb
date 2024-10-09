@@ -3,7 +3,7 @@
         margin: 10px !important;
     }
 </style>
-<div class="container mt-4">
+<div class="mt-4 mx-0">
   <div class="row">
     <div class="col-12">
       <h2 class="mb-4">Registered Users</h2>
@@ -17,6 +17,8 @@
               <th>Wallet Address</th>
               <th>Total Earning</th>
               <th>Registration Date</th>
+              <th>Remarks</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -28,6 +30,8 @@
                 <td><%= user.wallet_address || "NA" %></td>
                 <td><%= number_to_currency(user.total_earning, unit: "$") %></td>
                 <td><%= user.created_at.strftime("%d-%m-%Y %H:%M") %></td>
+                <td><textarea type="text" id="remarks_<%=user.id%>"  rows="3" width="300px;"><%= user.remarks %></textarea></td>
+                <td><div class="btn btn-sm btn-warning" onclick="updateRemarks(this,'<%=user.id%>')">Update Remarks</div></td>
               </tr>
             <% end %>
           </tbody>
@@ -43,3 +47,31 @@
     </div>
   </div>
 </div>
+
+<script>
+  function updateRemarks(selector,tg_user_id){
+    const remarks = document.getElementById("remarks_"+tg_user_id).value;
+    selector.disabled = true;
+    fetch(`/tasks/add_remarks?id=${tg_user_id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify({ remarks: remarks })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        Swal.fire("Remarks updated successfully!");
+      } else {
+        Swal.fire("Error updating remarks.");
+      }
+    })
+    .catch(error => {
+      Swal.fire("Something went wrong.");
+      console.error('Error:', error);
+    });
+    selector.disabled = false;
+  }
+</script>

@@ -37,6 +37,7 @@ Rails.application.routes.draw do
       get :users
       post :bulk_toggle_payment
       post :bulk_change_status
+      post :add_remarks
     end
     member do 
       get :task_details

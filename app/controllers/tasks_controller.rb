@@ -165,7 +165,8 @@ class TasksController < ApplicationController
 
     return render json: {success: false, message: "Invalid Request"} unless @user.present?
     
-    @tasks = TgTask.joins(:tg_task_submissions).where(tg_task_submissions: {tg_user_id: @user.id}).distinct
+    task_ids = TgTaskSubmission.where(tg_user_id: @user.id).select(:tg_task_id).distinct.map {|x| x.tg_task_id}
+    @tasks = TgTask.where(id: task_ids)
   end
 
   def profile
@@ -203,6 +204,8 @@ class TasksController < ApplicationController
     @task_submission.submission_type = @task.submission_type
 
     @task_submission.status = :pending
+
+    @task_submission.meta = params[:meta]
 
     file_ids = @task_submission.uploaded_files
 
@@ -362,6 +365,15 @@ class TasksController < ApplicationController
   rescue => e
     render json: { status: 'error', message: e.message }, status: :unprocessable_entity
   end
+
+  def add_remarks
+    @tg_user = TgUser.find(params[:id])
+    if @tg_user.update(remarks: params[:remarks])
+      render json: { success: true, message: "Remarks updated successfully!" }
+    else
+      render json: { success: false, message: @tg_user.errors.full_messages.join(', ') }, status: :unprocessable_entity
+    end
+  end
   
 
   
@@ -372,7 +384,7 @@ class TasksController < ApplicationController
   end
 
   def task_params
-    params.require(:tg_task).permit(:cost, :name, :description, :status, :submission_type, :start_time, :end_time, :maximum_per_user,:minimum_gap_in_hours,:is_private)
+    params.require(:tg_task).permit(:cost, :name, :description, :status, :submission_type, :start_time, :end_time, :maximum_per_user,:minimum_gap_in_hours,:is_private, custom_fields: [])
   end
 
   def get_file_path_from_telegram(file_id)

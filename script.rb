@@ -138,7 +138,7 @@ def set_telegram_webhook
 
   @base_url = "https://tgapp-new.onrender.com"
   if Rails.env.development?
-    @base_url = "https://13e9-103-240-235-244.ngrok-free.app"
+    @base_url = "https://b67f-2401-4900-5d8f-e6b5-f5ff-d938-cb49-9e01.ngrok-free.app"
   end
 
   webhook_url = "#{@base_url}/webhooks/telegram"

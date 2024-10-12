@@ -107,7 +107,7 @@ class TasksController < ApplicationController
 
   def old_upload_file_to_telegram(file,chat_id = nil)
     Telegram::Bot::Client.run(@token_key) do |bot|
-      chat_id = chat_id || 954015423
+      chat_id = @admin_chat_id
   
       if file.present?
         if file.content_type.start_with?('image')
@@ -124,7 +124,7 @@ class TasksController < ApplicationController
   
   def upload_file_to_telegram(file, chat_id = nil)
     Telegram::Bot::Client.run(@token_key) do |bot|
-      chat_id = chat_id || 954015423
+      chat_id = @admin_chat_id
   
       if file.present?
         # Send file as a document to avoid compression

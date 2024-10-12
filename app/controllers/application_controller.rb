@@ -31,10 +31,10 @@ class ApplicationController < ActionController::Base
 
     def set_details
       @token_key = "8089330080:AAF9axFl5p31fcuHoCXujAQE91UICSRM86I"
-      # @token_key = "7833696942:AAHFl9xnJ98zrDfp_n5-kIDvAnXlTf0reVM"
       @base_url = "https://tgapp-new.onrender.com"
       if Rails.env.development?
-        @base_url = "https://bca0-150-242-86-79.ngrok-free.app"
+        @token_key = "7833696942:AAHFl9xnJ98zrDfp_n5-kIDvAnXlTf0reVM"
+        @base_url = "https://66af-103-240-235-85.ngrok-free.app"
       end
     end
   end

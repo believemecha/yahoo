@@ -1,4 +1,6 @@
 
+<button onclick="Telegram.WebApp.close()" class="btn btn-danger my-2">Back To HomePage</button>
+
 <%if !@task.is_available%>
   Task is not Available to Submit. Please choose other tasks from the bot.
 <%else%>
@@ -13,7 +15,7 @@
 
   <b><%=@task.name%></b> 
   <br> 
-  <b><%=@task.description%></b>
+  <p><%=@task.description%></p>
   <br>
   <br>
   
@@ -25,17 +27,34 @@
   <%if @task.image? || @task.video?%>
     <div class="form-group">
         <label for="files">Upload Images and Videos</label>
-        <input type="file" name="files[]" id="files" class="form-control" multiple accept="image/*,video/*" <%=@task_submission&.uploaded_files.to_a.length == 0 ? "required" : ""%>>
+        <input type="file" name="files[]" id="files" class="form-control" multiple accept="image/*,video/*">
         <span>Prevously Choosen: <%=@task_submission&.uploaded_files.to_a.length%> files</span>
     </div>
   <%end%>
 
-  <button type="submit" class="btn btn-success"><%= @is_new_submission ? 'Submit' : 'Update Task' %></button>
+  <%if @task.custom_fields.present?%>
+    <h3>Special Details</h3>
+  <%end%>
+  <%@task.custom_fields.to_a.each do |field_name|%>
+    <div class="form-group">
+      <label for="meta[<%=field_name%>]"><%=field_name.to_s.capitalize%></label>
+      <textarea name="meta[<%=field_name%>]" id="id_for_<%=field_name%>" class="form-control" rows="1"><%= (@task_submission&.meta || {})["#{field_name}"] || '' %></textarea>
+    </div>
+  <%end%>
+
+  <button type="submit" class="btn btn-success" id="submitBtn"><%= @is_new_submission ? 'Submit' : 'Update Task' %></button>
 </form>
 
 <script>
+  let isLoading = false;
+  const submitBtn = document.getElementById("submitBtn");
   function submitTask(event) {
+    if(isLoading){
+      return;
+    }
     event.preventDefault();
+    isLoading = true;
+    submitBtn.disabled = true;
 
     const formData = new FormData(document.getElementById('taskForm'));
     const method = "POST";
@@ -59,11 +78,19 @@
         text: data.message
       }).then(()=>{
           if(data.success || data.redirect){
+            submitBtn.disabled = false;
             window.location.href = all_s;
+          }
+          else{
+            submitBtn.disabled = false;
           }
       })
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+          submitBtn.disabled = false;
+    });
+
+    isLoading = false;
   }
 </script>
 <%end%>

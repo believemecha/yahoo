@@ -1,4 +1,4 @@
-<!-- app/views/tasks/index.html.erb -->
+<div class="container-fluid">
 <h1>Tasks</h1>
 <%= link_to 'New Task', new_task_path, class: 'btn btn-primary' %>
 
@@ -21,7 +21,6 @@
       <th>Maximum Sub Limit</th>
       <th>Minimum Gap</th>
       <th>Actions</th>
-      <th>Actions</th>
       <th>Download</th>
     </tr>
   </thead>
@@ -33,11 +32,11 @@
         <td><%= task.description.truncate(50) %></td>
         <td>
           <%=task.is_private ? "Yes": "NO"%>
-          <%= link_to 'Private details', task_details_task_path(id: task.id), class: 'btn btn-warning', target: "_blank"  if task.is_private%>
+          <%= link_to 'Manage Private details', task_details_task_path(id: task.id), class: 'btn btn-warning', target: "_blank"  if task.is_private%>
         </td>
         <td><span style="font-size: 12px;"><%= task.start_time %> <br> <%= task.end_time %></span></td>
         <td>
-          <a href="/tasks/add_files?id=<%=task.id%>" target="_blank"><%= task.links.length %> Uploaded </a>
+          <a href="/tasks/add_files?id=<%=task.id%>" target="_blank" class="btn btn-sm btn-primary">Manage Files</a>
           <ol>
             <%task.urls(@base_url).each_with_index do |x,index|%>
               <li><a href="<%=x%>" target="_blank"><%=index + 1%> File</a></li>
@@ -50,12 +49,8 @@
         <td><%= task.minimum_gap_in_hours %></td>
         <td>
           <%= link_to 'View/Edit', new_task_path(id: task.id), class: 'btn btn-warning' %>
-
-        </td>
-
-        <td>
-            <%= link_to 'Submissions', submissions_tasks_path(task_id: task.id), class: 'btn btn-info mx-1' %>
-
+          
+          <%= link_to 'Submissions', submissions_tasks_path(task_id: task.id), class: 'btn btn-info mt-2' %>
         </td>
         <td>
            <%= link_to 'Download', "/tasks/export_csv.csv?task_id=#{task.id}", class: 'btn btn-info mx-1' %>
@@ -64,3 +59,5 @@
     <% end %>
   </tbody>
 </table>
+</div>
+

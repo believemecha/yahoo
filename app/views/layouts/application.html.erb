@@ -17,15 +17,20 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <%end%>
  
   </head>
 
   <body>
-      <div class="container">
-        <h2><%=notice%></h2>
-        <h2 style="color: red;"><%=alert%></h2>
-        <%= yield %>
-      </div>
+      <%if !@no_layout%>
+        <div class="container">
+          <h2><%=notice%></h2>
+          <h2 style="color: red;"><%=alert%></h2>
+          <%= yield %>
+        </div>
+      <%else%>
+         <%= yield %>
+      <%end%>
   </body>
 </html>

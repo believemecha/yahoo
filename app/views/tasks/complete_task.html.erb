@@ -42,12 +42,19 @@
     </div>
   <%end%>
 
-  <button type="submit" class="btn btn-success"><%= @is_new_submission ? 'Submit' : 'Update Task' %></button>
+  <button type="submit" class="btn btn-success" id="submitBtn"><%= @is_new_submission ? 'Submit' : 'Update Task' %></button>
 </form>
 
 <script>
+  let isLoading = false;
+  const submitBtn = document.getElementById("submitBtn");
   function submitTask(event) {
+    if(isLoading){
+      return;
+    }
     event.preventDefault();
+    isLoading = true;
+    submitBtn.disabled = true;
 
     const formData = new FormData(document.getElementById('taskForm'));
     const method = "POST";
@@ -71,11 +78,19 @@
         text: data.message
       }).then(()=>{
           if(data.success || data.redirect){
+            submitBtn.disabled = false;
             window.location.href = all_s;
+          }
+          else{
+            submitBtn.disabled = false;
           }
       })
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+          submitBtn.disabled = false;
+    });
+
+    isLoading = false;
   }
 </script>
 <%end%>

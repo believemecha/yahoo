@@ -203,6 +203,16 @@ class TasksController < ApplicationController
       end
     end
 
+    last_submission = TgTaskSubmission.where(tg_user_id: @user.try(:id), tg_task_id: @task.try(:id)).order(created_at: :desc).first
+
+    if !@task_submission.id.present? && last_submission.present?
+      gap = (Time.zone.now - last_submission.created_at)/60.to_f
+      is_gap_less = @task.minimum_gap_in_hours.to_i > gap
+      if is_gap_less
+        return render json: {success: false, message: "Please wait for #{(@task.minimum_gap_in_hours - gap.to_i).to_i } mins before a new submission."}
+      end
+    end
+
     @task_submission.submission_type = @task.submission_type
 
     @task_submission.status = :pending

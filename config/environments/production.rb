@@ -93,15 +93,6 @@ Rails.application.configure do
 
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
-  config.action_mailer.default_options = {from: 'lbsingh732196@gmail.com', reply_to: 'lbsingh732196@gmail.com'}
+  config.action_mailer.default_options = {from: 'abc@gmail.com', reply_to: 'abc@gmail.com'}
   config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = {
-  address:              'smtp.gmail.com',
-  port:                 587,
-  domain:               'gmail.com',
-  user_name:            'lbsingh732196@gmail.com',
-  password:             'gzzw eabf bilj dths',
-  authentication:       'plain',
-  enable_starttls_auto: true  }
-  config.action_mailer.default_url_options = { host: 'jalalpur.in' }
 end

@@ -138,7 +138,7 @@ def set_telegram_webhook
 
   @base_url = "https://tgapp-new.onrender.com"
   if Rails.env.development?
-    @base_url = "https://b67f-2401-4900-5d8f-e6b5-f5ff-d938-cb49-9e01.ngrok-free.app"
+    @base_url = "https://66af-103-240-235-85.ngrok-free.app/"
   end
 
   webhook_url = "#{@base_url}/webhooks/telegram"
@@ -149,3 +149,24 @@ def set_telegram_webhook
   end
 end
 
+
+Done! Congratulations on your new bot. You will find it at t.me/TeleJobsBBot. You can now add a description, about section and profile picture for your bot, see /help for a list of commands. By the way, when you've finished creating your cool bot, ping our Bot Support if you want a better username for it. Just make sure the bot is fully operational before you do this.
+
+  Use this token to access the HTTP API:
+  8150695652:AAH5Kqr8qFvV_iYcaw1wm8r4E8G2ByQ-UUc
+  Keep your token secure and store it safely
+
+
+
+  RAILS_MASTER_KEY = 47e01124eae37b6362b7a4121b37aaae
+
+  WEB_CONCURRENCY = 2
+
+
+  internal
+postgresql://telejob_user:RngqJh2RjizStq8ldLbFcFO54UJfCJta@dpg-cs39a4bv2p9s738vhds0-a/telejob
+external
+postgresql://telejob_user:RngqJh2RjizStq8ldLbFcFO54UJfCJta@dpg-cs39a4bv2p9s738vhds0-a.oregon-postgres.render.com/telejob
+
+dogxoxdog@gmail.com
+lrVjoQ9RX1JN12iI

@@ -23,10 +23,14 @@
   </head>
 
   <body>
-      <div class="container">
-        <h2><%=notice%></h2>
-        <h2 style="color: red;"><%=alert%></h2>
-        <%= yield %>
-      </div>
+      <%if !@no_layout%>
+        <div class="container">
+          <h2><%=notice%></h2>
+          <h2 style="color: red;"><%=alert%></h2>
+          <%= yield %>
+        </div>
+      <%else%>
+         <%= yield %>
+      <%end%>
   </body>
 </html>

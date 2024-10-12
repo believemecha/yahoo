@@ -66,6 +66,7 @@
       <th>User</th>
       <th>User Wallet Address</th>
       <th>Description</th>
+      <th>Custom Field Details</th>
       <th>Status</th>
       <th>Uploaded Files</th>
       <th>Is Paid</th>
@@ -81,6 +82,13 @@
         <td><%= submission.tg_user.try(:name) if submission.tg_user_id %></td>
         <td><%=submission.tg_user.try(:wallet_address) || "NA"%></td>
         <td><%= submission.description %></td>
+        <td>
+            <ol>
+                <%(submission.meta || {}).each do |key,value|%>
+                <li><b><%=key%>:</b><%=value%></li>
+                <%end%>
+            </ol>
+        </td>
         <td><%= submission.status %></td>
         <td>
           <%= submission.uploaded_files.length if submission.uploaded_files.any? %>

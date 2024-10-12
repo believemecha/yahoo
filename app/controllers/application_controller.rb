@@ -20,6 +20,10 @@ class ApplicationController < ActionController::Base
         super
     end
 
+    def no_layout
+      @no_layout = true
+    end
+
   
     rescue_from SecurityError do |exception|
       redirect_to root_path

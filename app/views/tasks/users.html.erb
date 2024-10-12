@@ -1,41 +1,46 @@
-<style>
-    .pagination.page{
-        margin: 10px !important;
-    }
-</style>
-<div class="mt-4 mx-0">
-  <div class="row">
+<div class="container-fluid">
+  <div class="row w-100">
     <div class="col-12">
       <h2 class="mb-4">Registered Users</h2>
       <% if @users.any? %>
         <table class="table table-bordered table-striped table-responsive-md">
           <thead class="thead-dark">
             <tr>
-              <th>User Id</th>  
+              <th><input type="checkbox" id="select_all"></th>
+              <th>User Id</th>
+              <th>Blocked</th>   
               <th>Name</th>
               <th>Chat ID</th>
               <th>Wallet Address</th>
               <th>Total Earning</th>
               <th>Registration Date</th>
               <th>Remarks</th>
-              <th>Action</th>
+              <th>Details</th>
             </tr>
           </thead>
           <tbody>
             <% @users.each do |user| %>
               <tr>
+                <td><input type="checkbox" class="user_checkbox" value="<%= user.id %>"></td>
                 <td><%= user.id %></td>
+                <td class="text-<%=user.blocked ? "danger": "success"%>"><%=user.blocked ? "Yes": "No"%></td>
                 <td><%= user.name %></td>
                 <td><%= user.chat_id %></td>
                 <td><%= user.wallet_address || "NA" %></td>
                 <td><%= number_to_currency(user.total_earning, unit: "$") %></td>
                 <td><%= user.created_at.strftime("%d-%m-%Y %H:%M") %></td>
-                <td><textarea type="text" id="remarks_<%=user.id%>"  rows="3" width="300px;"><%= user.remarks %></textarea></td>
-                <td><div class="btn btn-sm btn-warning" onclick="updateRemarks(this,'<%=user.id%>')">Update Remarks</div></td>
+                <td>
+                  <textarea type="text" id="remarks_<%= user.id %>" rows="3" width="300px;"><%= user.remarks %></textarea>
+                  <div class="btn btn-sm btn-warning" onclick="updateRemarks(this,'<%= user.id %>')">Update Remarks</div>
+                </td>
+                <td><a class="btn btn-sm btn-primary" href="/tasks/user_details?id=<%= user.id %>" target="_blank">History</a></td>
               </tr>
             <% end %>
           </tbody>
         </table>
+        <div class="mt-3">
+          <button class="btn btn-primary" id="bulk_update" onclick="bulkUpdateStatus()">Update Banned Status</button>
+        </div>
       <% else %>
         <div class="alert alert-warning" role="alert">
           No users found.
@@ -48,8 +53,14 @@
   </div>
 </div>
 
+
 <script>
-  function updateRemarks(selector,tg_user_id){
+document.getElementById('select_all').addEventListener('change', function() {
+  const checkboxes = document.querySelectorAll('.user_checkbox');
+  checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+});
+
+function updateRemarks(selector,tg_user_id){
     const remarks = document.getElementById("remarks_"+tg_user_id).value;
     selector.disabled = true;
     fetch(`/tasks/add_remarks?id=${tg_user_id}`, {
@@ -73,5 +84,69 @@
       console.error('Error:', error);
     });
     selector.disabled = false;
+}
+
+function bulkUpdateStatus() {
+  const selectedUsers = [];
+  const checkboxes = document.querySelectorAll('.user_checkbox:checked');
+  
+  checkboxes.forEach(checkbox => {
+    const userId = checkbox.value;
+    selectedUsers.push(userId);
+  });
+
+  if (selectedUsers.length === 0) {
+    Swal.fire("No users selected.");
+    return;
   }
+
+  // Ask the user for the status using Swal
+  Swal.fire({
+    title: 'Update Status',
+    text: 'Do you want to ban or unban the selected users?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Ban',
+    cancelButtonText: 'Unban',
+    showCloseButton: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      updateUserStatus(selectedUsers, true);  // Ban the users
+    } else if (result.dismiss === Swal.DismissReason.cancel) {
+      updateUserStatus(selectedUsers, false); // Unban the users
+    }
+  });
+}
+
+function updateUserStatus(userIds, bannedStatus) {
+  document.getElementById('bulk_update').disabled = true;
+
+  fetch('/tasks/bulk_update_status', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    },
+    body: JSON.stringify({ user_ids: userIds, banned: bannedStatus })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      Swal.fire("Status updated successfully!").then(()=>{
+                window.location.reload();
+      })
+    } else {
+      Swal.fire("Error updating status.");
+    }
+  })
+  .catch(error => {
+    Swal.fire("Something went wrong.");
+    console.error('Error:', error);
+  })
+  .finally(() => {
+    document.getElementById('bulk_update').disabled = false;
+  });
+}
+
+
 </script>

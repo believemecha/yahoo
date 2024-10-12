@@ -5,7 +5,7 @@
       <thead>
         <tr>
          <th>Id</th>
-          <th>Assigned To User Id</th>
+          <th>Assigned</th>
           <th>Details</th>
           <th>Action</th>
         </tr>
@@ -17,10 +17,10 @@
              <input type="text" name="tg_task_details[<%= index %>][id]" value="<%= task_detail.id%>" readonly >
             </td>
             <td>
-              <input type="text" name="tg_task_details[<%= index %>][tg_user_id]" value="<%= task_detail.tg_user_id%>" class="form-control" readonly  placeholder="Unassigned">
+              <input type="text" name="tg_task_details[<%= index %>][tg_user_id]" value="<%= task_detail.tg_user_id%>" class="form-control" readonly  placeholder="NA">
             </td>
             <td>
-              <input type="text" name="tg_task_details[<%= index %>][details]" value="<%= task_detail.details %>" class="form-control">
+              <textarea type="text" name="tg_task_details[<%= index %>][details]" rows="3" class="form-control"><%= task_detail.details %> </textarea>
             </td>
             <td>
                 <button type="button" class="btn btn-danger remove-task-detail" id="<%=task_detail.id%>">Remove</button>
@@ -56,7 +56,7 @@
             <input type="text" name="tg_task_details[${newRowIndex}][tg_user_id]" class="form-control" placeholder="Will Auto Assign User Id" readonly >
           </td>
           <td>
-            <input type="text" name="tg_task_details[${newRowIndex}][details]" class="form-control" placeholder="Enter task details">
+            <textarea type="text" name="tg_task_details[${newRowIndex}][details]" class="form-control" placeholder="Enter task details" rows="3"></textarea>
           </td>
           <td>
             <button type="button" class="btn btn-danger remove-task-detail">Remove</button>

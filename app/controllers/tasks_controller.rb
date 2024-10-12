@@ -6,6 +6,7 @@ class TasksController < ApplicationController
   require 'telegram/bot'
 
   def index
+    no_layout
     @tasks = TgTask.order(created_at: :desc)
   end
 
@@ -176,6 +177,7 @@ class TasksController < ApplicationController
   end
 
   def users
+    no_layout
     @users = TgUser.order(created_at: :desc)
     @users = @users.page(params[:page] || 1).per(50)
   end
@@ -374,6 +376,37 @@ class TasksController < ApplicationController
       render json: { success: false, message: @tg_user.errors.full_messages.join(', ') }, status: :unprocessable_entity
     end
   end
+
+  def bulk_update_status
+    user_ids = params[:user_ids]
+    banned = params[:banned]
+
+    TgUser.where(id: user_ids).update_all(blocked: banned)
+
+    render json: { success: true }
+  rescue => e
+    render json: { success: false, error: e.message }
+  end
+
+  def user_details
+    @user = TgUser.find_by(id: params[:id])
+    return redirect_to root_path, notice: "User Not Found" unless @user.present?
+  
+    # Get the user's task submissions and relevant task information
+    @task_submissions = TgTaskSubmission
+                          .includes(:tg_task)
+                          .where(tg_user_id: @user.id)
+  
+    # Get task details for the user
+    @task_details = TgTaskDetail.where(tg_user_id: @user.id)
+  
+    # Calculate total earnings
+    @total_earnings = @task_submissions.where(is_paid: true).sum(:earning)
+  
+    # Get user's payment history
+    @payment_history = @task_submissions.where(is_paid: true)
+  end
+  
   
 
   

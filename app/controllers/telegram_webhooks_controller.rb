@@ -26,13 +26,13 @@ class TelegramWebhooksController < ApplicationController
       text = message['text']
 
 
-      if reply_to_message_id.present? && tg_user.wallet_message_id == reply_to_message_id.to_i
+      if reply_to_message_id.present? && tg_user.present && tg_user.wallet_message_id.present? && (tg_user.wallet_message_id == reply_to_message_id.to_i)
         tg_user.update_columns(wallet_address: text)
         send_message(chat_id,"Wallet Updated Successfully to Address: <b>#{tg_user.reload.wallet_address}</b>")
         return head :ok
       end
 
-      if message["message_id"].to_i  == tg_user.wallet_message_id + 1
+      if tg_user.present? && tg_user.wallet_message_id.present? && (message["message_id"].to_i  == tg_user.wallet_message_id + 1)
         tg_user.update_columns(wallet_address: text)
         send_message(chat_id,"Wallet Updated Successfully to Address: <b>#{tg_user.reload.wallet_address}</b>")
         return head :ok
@@ -232,7 +232,8 @@ class TelegramWebhooksController < ApplicationController
           end
           message = message + "\n \n" \
                     "<b>Please use below information</b>\n" \
-                    "<b>#{task_details.details}</b>"
+                    "<b>#{task_details.details}</b>\n\n"
+          message = message + "#{(task_details.meta || {}).map {|k,v| "<b>#{k}:</b> #{v}"}.join("\n")}" 
         end          
         send_message(chat_id,message)
         task.links.each do |file_id|

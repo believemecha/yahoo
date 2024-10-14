@@ -363,11 +363,11 @@ class TasksController < ApplicationController
     (params[:tg_task_details] || []).each do |task_detail_params|
       if task_detail_params[:id].present?
         task_detail = TgTaskDetail.find(task_detail_params[:id])
-        if task_detail.update(details:task_detail_params[:details] )
+        if task_detail.update(details:task_detail_params[:details],meta: task_detail_params[:meta])
         else
         end
       else
-        TgTaskDetail.create(tg_task_id: task.id,details:task_detail_params[:details])
+        TgTaskDetail.create(tg_task_id: task.id,details:task_detail_params[:details],meta: task_detail_params[:meta])
       end
     end
 

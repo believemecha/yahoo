@@ -4,9 +4,10 @@
     <table class="table table-bordered">
       <thead>
         <tr>
-         <th>Id</th>
+          <th>Id</th>
           <th>Assigned</th>
           <th>Details</th>
+          <th>Custom (Key-Value)</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -14,16 +15,28 @@
         <% @task_details.each_with_index do |task_detail, index| %>
           <tr>
             <td>
-             <input type="text" name="tg_task_details[<%= index %>][id]" value="<%= task_detail.id%>" readonly >
+              <input type="text" name="tg_task_details[<%= index %>][id]" value="<%= task_detail.id %>" readonly >
             </td>
             <td>
-              <input type="text" name="tg_task_details[<%= index %>][tg_user_id]" value="<%= task_detail.tg_user_id%>" class="form-control" readonly  placeholder="NA">
+              <input type="text" name="tg_task_details[<%= index %>][tg_user_id]" value="<%= task_detail.tg_user_id %>" class="form-control" readonly placeholder="NA">
             </td>
             <td>
               <textarea type="text" name="tg_task_details[<%= index %>][details]" rows="3" class="form-control"><%= task_detail.details %> </textarea>
             </td>
             <td>
-                <button type="button" class="btn btn-danger remove-task-detail" id="<%=task_detail.id%>">Remove</button>
+              <div class="meta-fields" id="meta-fields-<%= index %>">
+                <% (task_detail.meta || {}).each do |key, value| %>
+                  <div class="meta-field-row">
+                    <input type="text" name="tg_task_details[<%= index %>][meta][key]" value="<%= key %>" class="form-control d-inline w-25" placeholder="Key">
+                    <input type="text" name="tg_task_details[<%= index %>][meta][value]" value="<%= value %>" class="form-control d-inline w-50" placeholder="Value">
+                    <button type="button" class="btn btn-danger remove-meta-field">X</button>
+                  </div>
+                <% end %>
+              </div>
+              <button type="button" class="btn btn-primary add-meta-field" data-index="<%= index %>">+ New</button>
+            </td>
+            <td>
+              <button type="button" class="btn btn-danger remove-task-detail" id="<%= task_detail.id %>">Remove</button>
             </td>
           </tr>
         <% end %>
@@ -40,23 +53,26 @@
     const taskDetailsBody = document.getElementById('task-details-body');
     const addTaskDetailButton = document.getElementById('add-task-detail');
     const taskDetailsForm = document.getElementById('task-details-form');
+    
+    let deletableIds = [];
+    let newRowIndex = <%= @task_details.size %>;
 
-    const deletableIds = [];
-
-    let newRowIndex = <%= @task_details.size %>;  // Start index after existing rows
-
-    // Function to add a new row
+    // Add new task detail row
     addTaskDetailButton.addEventListener('click', function () {
       const newRow = `
         <tr>
+          <td>New</td>
           <td>
-           New
+            <input type="text" name="tg_task_details[${newRowIndex}][tg_user_id]" class="form-control" placeholder="Auto Assign User Id" readonly>
           </td>
           <td>
-            <input type="text" name="tg_task_details[${newRowIndex}][tg_user_id]" class="form-control" placeholder="Will Auto Assign User Id" readonly >
+            <textarea name="tg_task_details[${newRowIndex}][details]" class="form-control" placeholder="Enter task details" rows="3"></textarea>
           </td>
           <td>
-            <textarea type="text" name="tg_task_details[${newRowIndex}][details]" class="form-control" placeholder="Enter task details" rows="3"></textarea>
+            <div id="meta-fields-${newRowIndex}" class="meta-fields">
+              <!-- Meta fields will be added here dynamically -->
+            </div>
+            <button type="button" class="btn btn-primary add-meta-field" data-index="${newRowIndex}">+ New</button>
           </td>
           <td>
             <button type="button" class="btn btn-danger remove-task-detail">Remove</button>
@@ -64,59 +80,100 @@
         </tr>
       `;
       taskDetailsBody.insertAdjacentHTML('beforeend', newRow);
-      newRowIndex++;  // Increment the row index for the next new row
+      newRowIndex++;
     });
 
-    // Remove row
+    // Add meta field
+    taskDetailsBody.addEventListener('click', function (event) {
+      if (event.target.classList.contains('add-meta-field')) {
+        const index = event.target.getAttribute('data-index');
+        const metaFieldsDiv = document.getElementById(`meta-fields-${index}`);
+        const metaFieldRow = `
+          <div class="meta-field-row">
+            <input type="text" name="tg_task_details[${index}][meta][key][]" class="form-control d-inline w-25" placeholder="Key">
+            <input type="text" name="tg_task_details[${index}][meta][value][]" class="form-control d-inline w-50" placeholder="Value">
+            <button type="button" class="btn btn-danger remove-meta-field">X</button>
+          </div>
+        `;
+        metaFieldsDiv.insertAdjacentHTML('beforeend', metaFieldRow);
+      }
+    });
+
+    // Remove task detail or meta field
     taskDetailsBody.addEventListener('click', function (event) {
       if (event.target.classList.contains('remove-task-detail')) {
-        let deleted_one = event.target.id;
-        if(deleted_one){
-            deletableIds.push(deleted_one);
+        let deletedId = event.target.id;
+        if (deletedId) {
+          deletableIds.push(deletedId);
         }
         event.target.closest('tr').remove();
+      } else if (event.target.classList.contains('remove-meta-field')) {
+        event.target.closest('.meta-field-row').remove();
       }
     });
 
     // Handle form submission
     taskDetailsForm.addEventListener('submit', function (event) {
       event.preventDefault();
-      
+
       const formData = new FormData(taskDetailsForm);
       const data = [];
       let currentObject = {};
+      let currentIndex = null;
+      let currentMeta = {};
+      let currentKey = null;
 
-      // Iterate over the form data
       for (let [name, value] of formData.entries()) {
-        const fieldMatch = name.match(/\[(\d+)\]\[(\w+)\]/);  // Matches [index][field_name]
-
-        console.log(fieldMatch,"fieldMatch");
+        const fieldMatch = name.match(/\[(\d+)\]\[(\w+)\]/);
         if (fieldMatch) {
+
           const fieldIndex = fieldMatch[1];
           const fieldName = fieldMatch[2];
-
           if (!currentObject[fieldIndex]) {
             currentObject[fieldIndex] = {};
           }
-          console.log(fieldIndex,fieldName,value,"datatata");
-          currentObject[fieldIndex][fieldName] = value;
+
+          if(currentIndex){
+            if(currentIndex!=fieldIndex){
+              currentObject[currentIndex]["meta"] = currentMeta;
+              currentMeta = {};
+            }
+          }
+          currentIndex = fieldIndex;
+
+          if(fieldName == "meta"){
+            if(name.includes("[key]")){
+              currentKey = value;
+            }
+            else if (name.includes("[value]")){
+              if(currentKey){
+                currentMeta[currentKey] = value;
+              }
+            }
+          }
+          else{
+            currentObject[fieldIndex][fieldName] = value;
+          }
         }
       }
 
-      // Push the objects into the array
+        if (currentIndex !== null) {
+         currentObject[currentIndex]["meta"] = currentMeta;
+        }
+
       for (const index in currentObject) {
         data.push(currentObject[index]);
       }
 
       console.log(data,"data");
 
-      fetch('/tasks/<%=params[:id]%>/update_task_details', {
+      fetch('/tasks/<%= params[:id] %>/update_task_details', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
-        body: JSON.stringify({ tg_task_details: data,deletable_ids: deletableIds })
+        body: JSON.stringify({ tg_task_details: data, deletable_ids: deletableIds })
       })
       .then(response => response.json())
       .then(result => {
@@ -126,9 +183,9 @@
             title: 'Success',
             text: result.message,
             timer: 2000
-          }).then(()=>{
+          }).then(() => {
             window.location.reload();
-          })
+          });
         } else {
           Swal.fire({
             icon: 'error',

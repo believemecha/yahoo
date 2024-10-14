@@ -35,7 +35,7 @@ class ApplicationController < ActionController::Base
       @admin_chat_id = 954015423
       if Rails.env.development?
         @token_key = "7833696942:AAHFl9xnJ98zrDfp_n5-kIDvAnXlTf0reVM"
-        @base_url = "https://66af-103-240-235-85.ngrok-free.app"
+        @base_url = "https://9d5f-103-240-235-96.ngrok-free.app"
       end
     end
   end

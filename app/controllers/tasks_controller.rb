@@ -2,7 +2,7 @@
 class TasksController < ApplicationController
   before_action :set_task, only: [:show, :edit, :update,:create_or_edit,:new,:add_files]
 
-  before_action :verify_access, except: [:complete_task,:submitted_tasks,:tasks_history,:update_complete_task,:profile]
+  before_action :verify_access, except: [:complete_task,:submitted_tasks,:tasks_history,:update_complete_task,:profile, :available_tasks]
   require 'telegram/bot'
 
   def index
@@ -415,6 +415,10 @@ class TasksController < ApplicationController
   
     # Get user's payment history
     @payment_history = @task_submissions.where(is_paid: true)
+  end
+
+  def available_tasks
+    @tasks = TgTask.active.where("tg_tasks.start_time <= ? and tg_tasks.end_time >= ?",Time.zone.now,Time.zone.now)
   end
   
   

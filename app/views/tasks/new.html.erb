@@ -65,7 +65,7 @@
 
   <div class="form-group">
     <label for="custom_fields">Custom Fields (Comma Seperated)</label>
-    <input type="text" name="tg_task[custom_fields]" id="custom_fields" class="form-control" value="<%= @task.custom_fields.join(",")%>" required>
+    <input type="text" name="tg_task[custom_fields]" id="custom_fields" class="form-control" value="<%= @task.custom_fields.join(",")%>">
   </div>
 
   <button type="submit" class="btn btn-success"><%= @task.new_record? ? 'Create Task' : 'Update Task' %></button>

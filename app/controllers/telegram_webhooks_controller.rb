@@ -49,6 +49,7 @@ class TelegramWebhooksController < ApplicationController
 
       case text
       when '/tasks'
+        # send_web_app_link("Tasks",chat_id,"#{@base_url}/tasks/available_tasks")
         list_tasks(tg_user)
       when '/start'
         welcome_message = <<~TEXT
@@ -122,7 +123,7 @@ class TelegramWebhooksController < ApplicationController
     send_message_markup(chat_id, "Please choose an option:", keyboard)
   end
 
-  def list_tasks(user)
+  def old_list_tasks(user)
     tasks = TgTask.active.where("tg_tasks.start_time <= ? and tg_tasks.end_time >= ?",Time.zone.now,Time.zone.now)
     if tasks.any?
       tasks.each do |task|
@@ -141,6 +142,43 @@ class TelegramWebhooksController < ApplicationController
     end
   end
 
+
+  def list_tasks(user)
+    tasks = TgTask.active.where("tg_tasks.start_time <= ? and tg_tasks.end_time >= ?",Time.zone.now,Time.zone.now)
+    if tasks.any?
+      tasks.each do |task|
+        early_details(user.chat_id, task)
+      end
+    else
+      send_message(user.chat_id, "No tasks available at the moment.")
+    end
+  end
+
+  def early_details(chat_id,task)
+
+    Telegram::Bot::Client.run(@token_key) do |bot|
+      buttons = [
+        Telegram::Bot::Types::InlineKeyboardButton.new(
+          text: "Select Task",
+          callback_data: "init_task_#{task.id}"
+        )
+      ]
+
+      keyboard = Telegram::Bot::Types::InlineKeyboardMarkup.new(
+        inline_keyboard: [buttons]
+      )
+  
+      bot.api.send_message(chat_id: chat_id, text: "Task: #{task.name}, Reward: $#{task.cost}", reply_markup: keyboard)
+    end
+  end
+
+  def view_next_details(chat_id,task)
+    message = "<b>Task: #{task.name}</b>\n" \
+                  "Description: #{task.description}\n" \
+                  "Reward: $#{task.cost}\n"
+    send_task_buttons(chat_id, task)         
+  end
+
   def send_task_buttons(chat_id, task)
 
     show_join = task.is_private
@@ -157,7 +195,6 @@ class TelegramWebhooksController < ApplicationController
         )
       ]
   
-      # Add the "Join Task" button only if show_join is true
       if show_join
         buttons << Telegram::Bot::Types::InlineKeyboardButton.new(
           text: "Join Task",
@@ -269,6 +306,22 @@ class TelegramWebhooksController < ApplicationController
         return
       end
       send_message(chat_id,"You have joined the task. Please View task details and complete the task by using Complete Task Button")
+    end
+
+    if callback_data.start_with?('init_task_')
+      task_id = callback_data.split('_').last.to_i
+      tg_user = TgUser.find_by(chat_id: chat_id)
+
+      task = TgTask.find_by(id: task_id)
+
+      if !task.is_available
+        send_message(chat_id, "This Task is not avaiable. Click /tasks to see avaiable tasks")
+        return
+      end
+
+      if task && tg_user
+        view_next_details(tg_user.chat_id,task)
+      end
     end
     
   end

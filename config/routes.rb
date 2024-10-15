@@ -40,6 +40,7 @@ Rails.application.routes.draw do
       post :add_remarks
       post :bulk_update_status
       get :user_details
+      get :available_tasks
     end
     member do 
       get :task_details

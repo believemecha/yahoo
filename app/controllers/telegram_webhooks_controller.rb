@@ -26,13 +26,13 @@ class TelegramWebhooksController < ApplicationController
       text = message['text']
 
 
-      if reply_to_message_id.present? && tg_user.present && tg_user.wallet_message_id.present? && (tg_user.wallet_message_id == reply_to_message_id.to_i)
+      if !text.starts_with?("/") && reply_to_message_id.present? && tg_user.present && tg_user.wallet_message_id.present? && (tg_user.wallet_message_id == reply_to_message_id.to_i)
         tg_user.update_columns(wallet_address: text)
         send_message(chat_id,"Wallet Updated Successfully to Address: <b>#{tg_user.reload.wallet_address}</b>")
         return head :ok
       end
 
-      if tg_user.present? && tg_user.wallet_message_id.present? && (message["message_id"].to_i  == tg_user.wallet_message_id + 1)
+      if !text.starts_with?("/") && tg_user.present? && tg_user.wallet_message_id.present? && (message["message_id"].to_i  == tg_user.wallet_message_id + 1)
         tg_user.update_columns(wallet_address: text)
         send_message(chat_id,"Wallet Updated Successfully to Address: <b>#{tg_user.reload.wallet_address}</b>")
         return head :ok

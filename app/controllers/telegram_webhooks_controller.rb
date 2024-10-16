@@ -39,10 +39,9 @@ class TelegramWebhooksController < ApplicationController
       end
 
       if !tg_user.wallet_address.present?
-        message = "<b> Please make sure you're familiar with crypto & the wallet address you entered is correct ,before you proceed.
-        </b>\n <b>Wallet Address is required before we proceed! </b> \n <b>Minimum Widthdrawl $10 USD </b>"
+        message = "<b> Please make sure you're familiar with crypto & the wallet address you entered is correct ,before you proceed. \n <b>Minimum Widthdrawl $5 USD </b>"
         send_message(chat_id,message)
-        wallet_message_id = send_message(chat_id,"Our default crypto is USDT, on network BEP20. Please reply to me on this message with the wallet address.")
+        wallet_message_id = send_message(chat_id,"Our default crypto is USDT, on network TRC20. Please reply to me on this message with the wallet address.")
         tg_user.update(wallet_message_id: wallet_message_id) if wallet_message_id.present?
         return head :ok
       end
@@ -75,9 +74,9 @@ class TelegramWebhooksController < ApplicationController
         send_web_app_link("Click Here To View History",chat_id,url)
       when "/enter_wallet"
         message = "<b> Please make sure you're familiar with crypto & the wallet address you entered is correct ,before you proceed.
-        </b> \n <b>Minimum Widthdrawl $10 USD </b>"
+        </b> \n <b>Minimum Widthdrawl $5 USD </b>"
         send_message(chat_id,message)
-        wallet_message_id = send_message(chat_id,"Our default crypto is USDT, on network BEP20. Please reply to me on this message with the wallet address.")
+        wallet_message_id = send_message(chat_id,"Our default crypto is USDT, on network TRC20. Please reply to me on this message with the wallet address.")
         tg_user.update(wallet_message_id: wallet_message_id) if wallet_message_id.present?
       when "/profile"
         profile_message = "Dear <b>#{tg_user.name}</b>,\nYour profile details are as below:\n" \

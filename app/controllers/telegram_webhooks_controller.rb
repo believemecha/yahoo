@@ -62,6 +62,10 @@ class TelegramWebhooksController < ApplicationController
         - <b>/enter_wallet</b>: Add or update your wallet address.
         - <b>/profile</b>: View your profile details, including wallet address and total earnings.
         - <b>/contact</b>: Contact Us.
+
+        Join Our Channel for faster updates.\n 
+        #{@chanel_link}
+
         Feel free to explore the commands above!
       TEXT
       send_message(chat_id, welcome_message)
@@ -84,6 +88,9 @@ class TelegramWebhooksController < ApplicationController
         send_message(chat_id,profile_message)
         url = "#{@base_url}/profile?user_code=#{tg_user.code}"
         send_web_app_link("Click To View Payment History",chat_id,url)
+      when "/contact"
+        url = @support_chat_link
+        send_message(chat_id,"Contact Support at \n #{@support_chat_link}")
       else
         welcome_message = <<~TEXT
         Command Not Recognised
@@ -96,6 +103,9 @@ class TelegramWebhooksController < ApplicationController
         - <b>/profile</b>: View your profile details, including wallet address and total earnings.
         - <b>/contact</b>: Contact Us.
         
+        Join Our Channel for faster updates.\n 
+        #{@chanel_link}
+
         Feel free to explore the commands above!
         TEXT
         send_message(chat_id,welcome_message)

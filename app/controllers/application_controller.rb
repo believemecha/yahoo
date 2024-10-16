@@ -33,9 +33,11 @@ class ApplicationController < ActionController::Base
       @token_key = "8089330080:AAF9axFl5p31fcuHoCXujAQE91UICSRM86I"
       @base_url = "https://tgapp-new.onrender.com"
       @admin_chat_id = 954015423
+      @support_chat_link = "https://t.me/Agyat_Insan"
+      @chanel_link = "https://t.me/Agyat_Insan"
       if Rails.env.development?
         @token_key = "7833696942:AAHFl9xnJ98zrDfp_n5-kIDvAnXlTf0reVM"
-        @base_url = "https://9d5f-103-240-235-96.ngrok-free.app"
+        @base_url = "https://194c-103-240-234-161.ngrok-free.app"
       end
     end
   end

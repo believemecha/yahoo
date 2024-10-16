@@ -39,7 +39,7 @@ class TelegramWebhooksController < ApplicationController
       end
 
       if !tg_user.wallet_address.present?
-        message = "<b> Please make sure you're familiar with crypto & the wallet address you entered is correct ,before you proceed. \n <b>Minimum Widthdrawl $5 USD </b>"
+        message = "Please make sure you're familiar with crypto & the wallet address you entered is correct ,before you proceed. \nMinimum withdrawal $5 USD"
         send_message(chat_id,message)
         wallet_message_id = send_message(chat_id,"Our default crypto is USDT, on network TRC20. Please reply to me on this message with the wallet address.")
         tg_user.update(wallet_message_id: wallet_message_id) if wallet_message_id.present?
@@ -73,8 +73,7 @@ class TelegramWebhooksController < ApplicationController
         url = "#{@base_url}/tasks_history?user_code=#{tg_user.code}"
         send_web_app_link("Click Here To View History",chat_id,url)
       when "/enter_wallet"
-        message = "<b> Please make sure you're familiar with crypto & the wallet address you entered is correct ,before you proceed.
-        </b> \n <b>Minimum Widthdrawl $5 USD </b>"
+        message = "Please make sure you're familiar with crypto & the wallet address you entered is correct ,before you proceed. \nMinimum withdrawal $5 USD"
         send_message(chat_id,message)
         wallet_message_id = send_message(chat_id,"Our default crypto is USDT, on network TRC20. Please reply to me on this message with the wallet address.")
         tg_user.update(wallet_message_id: wallet_message_id) if wallet_message_id.present?

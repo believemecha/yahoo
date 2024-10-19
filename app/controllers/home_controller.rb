@@ -10,7 +10,7 @@ class HomeController < ApplicationController
         @otps = @otps.page(params[:page]).per(20)
 
         # delete the codes
-        InboundEmail.where("created_at < ?", 5.minutes.ago).delete_all
+        InboundEmail.where("created_at < ?", 10.minutes.ago).delete_all
     end
 
     def webhook

@@ -22,6 +22,9 @@ Rails.application.routes.draw do
 
   get "/profile", to: "tasks#profile"
 
+  get "/otps", to: "home#index"
+
+
   resources :tasks do
     collection do
       post :create_or_edit

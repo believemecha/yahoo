@@ -198,7 +198,7 @@ class TelegramWebhooksController < ApplicationController
           callback_data: "complete_task_#{task.id}"
         ),
         Telegram::Bot::Types::InlineKeyboardButton.new(
-          text: "View Complete Details",
+          text: "View Task Details",
           callback_data: "view_task_#{task.id}"
         )
       ]

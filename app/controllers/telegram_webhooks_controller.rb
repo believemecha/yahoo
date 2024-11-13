@@ -80,6 +80,7 @@ class TelegramWebhooksController < ApplicationController
       when "/profile"
         profile_message = "Dear <b>#{tg_user.name}</b>,\nYour profile details are as below:\n" \
                   "<b>Name</b>: #{tg_user.name}\n" \
+                  "<b>UserId</b>: #{tg_user.id}\n" \
                   "<b>Wallet Address</b>: #{tg_user.wallet_address.present? ? tg_user.wallet_address : '<a href="/enter_wallet">Not Added, Click here to add</a>'}\n" \
                   "<b>Total Earnings</b>: #{tg_user.total_earning.present? ? tg_user.total_earning : 'Not Available'}"
 

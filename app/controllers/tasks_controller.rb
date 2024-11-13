@@ -197,7 +197,7 @@ class TasksController < ApplicationController
     end
     
     if !@task_submission.present?
-      @task_submission = TgTaskSubmission.new(tg_user_id: @user.try(:id), tg_task_id: @task.try(:id))
+      @task_submission = TgTaskSubmission.new(tg_user_id: @user.try(:id), tg_task_id: @task.try(:id),earning: @task.cost)
       if TgTaskSubmission.where(tg_user_id: @user.try(:id), tg_task_id: @task.try(:id)).count >= @task.maximum_per_user.to_i
         return render json: {success: false, redirect: true, message: "Maximum mumber of submissions reached for this task."}
       end
@@ -331,7 +331,8 @@ class TasksController < ApplicationController
   
   def bulk_toggle_payment
     submission_ids = params[:submission_ids]
-  
+    has_been_paid = params[:is_paid]
+
     submissions = TgTaskSubmission.where(id: submission_ids)
   
     if submissions.empty?
@@ -341,7 +342,7 @@ class TasksController < ApplicationController
     ids = []
 
     submissions.each do |submission|
-      if submission.update(is_paid: !submission.is_paid)
+      if submission.update(is_paid: has_been_paid)
         ids << submission.tg_user_id
       end
     end

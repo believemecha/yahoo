@@ -3,7 +3,7 @@
 <p><strong>Name:</strong> <%= @user.name %></p>
 <p><strong>Chat ID:</strong> <%= @user.chat_id %></p>
 <p><strong>Wallet Address:</strong> <%= @user.wallet_address || "NA" %></p>
-<p><strong>Total Earnings:</strong> <%= number_to_currency(@total_earnings, unit: "$") %></p>
+<p><strong>Total Earnings:</strong> $<%= @total_earnings %></p>
 <p><strong>Remarks:</strong> <%= @user.remarks %></p>
 
 <h3>Task Submissions</h3>
@@ -28,7 +28,7 @@
         <td><%= submission.tg_task.name %></td>
         <td><%= submission.status %></td>
         <td><%= submission.submission_type %></td>
-        <td><%= number_to_currency(submission.earning, unit: "$") %></td>
+        <td>$<%= submission.earning %></td>
         <td><%= submission.is_paid ? "Yes" : "No" %></td>
         <td><%= submission.created_at.strftime("%d-%m-%Y %H:%M") %></td>
         <td>
@@ -62,7 +62,7 @@
       <tr>
         <td><%= payment.tg_task_id %></td>
         <td><%= payment.tg_task.name %></td>
-        <td><%= number_to_currency(payment.earning, unit: "$") %></td>
+        <td>$<%= payment.earning %></td>
         <td><%= payment.updated_at.strftime("%d-%m-%Y %H:%M") %></td>
       </tr>
     <% end %>

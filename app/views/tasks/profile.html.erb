@@ -18,7 +18,7 @@
               <% task = TgTask.find_by(id: submission.tg_task_id) %>
               <tr>
                 <td><%= task.name %></td>
-                <td><%= number_to_currency(submission.earning, unit: "$") %></td>
+                <td>$<%= submission.earning %></td>
                 <td><%= submission.created_at.strftime("%d-%m-%Y %H:%M") %></td>
               </tr>
             <% end %>

@@ -283,7 +283,7 @@ class TasksController < ApplicationController
     if toogle_type == "rating"
       final_status = @submission.approved? ? "pending" : "approved" 
       if @submission.update(status: final_status)
-        total_amount = @submission.tg_user.tg_task_submissions.approved.pluck(:earning).compact.sum
+        total_amount = @submission.tg_user.tg_task_submissions.where(is_paid: true).pluck(:earning).compact.sum
         @submission.tg_user.update_columns(total_earning: total_amount)
         return render json: {status: true, message: "Updated Successfully"}
       else
@@ -293,7 +293,7 @@ class TasksController < ApplicationController
       final_paid = !@submission.is_paid
       amount =  final_paid ? @task.cost : nil
       if @submission.update(is_paid: final_paid,earning: amount)
-        total_amount = @submission.tg_user.tg_task_submissions.approved.pluck(:earning).compact.sum
+        total_amount = @submission.tg_user.tg_task_submissions.where(is_paid: true).pluck(:earning).compact.sum
         @submission.tg_user.update_columns(total_earning: total_amount)
         return render json: {status: true, message: "Updated Successfully"}
       else
@@ -321,8 +321,9 @@ class TasksController < ApplicationController
       end
     end
 
-    TgTaskSubmission.where(tg_user_id: ids,is_paid: true).group(:tg_user).sum(:earning).each do |user_id,amount|
-      TgUser.where(id: user_id).update(total_earning: amount)
+    ids.to_a.uniq.each do |user_id|
+      total_earning = TgTaskSubmission.where(tg_user_id: user_id, is_paid: true).pluck(:earning).compact.sum
+      TgUser.where(id: user_id).update(total_earning: total_earning)
     end
     
   
@@ -347,8 +348,9 @@ class TasksController < ApplicationController
       end
     end
 
-    TgTaskSubmission.where(tg_user_id: ids,is_paid: true).group(:tg_user).sum(:earning).each do |user_id,amount|
-      TgUser.where(id: user_id).update(total_earning: amount)
+    ids.to_a.uniq.each do |user_id|
+      total_earning = TgTaskSubmission.where(tg_user_id: user_id, is_paid: true).pluck(:earning).compact.sum
+      TgUser.where(id: user_id).update(total_earning: total_earning)
     end
   
     render json: { status: true, message: "Bulk payment toggle completed successfully." }

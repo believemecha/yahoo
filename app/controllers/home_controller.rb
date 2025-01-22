@@ -76,34 +76,37 @@ class HomeController < ApplicationController
         email_content = params[:html]
 
         summary = params[:summary]
-
+        
         doc = Nokogiri::HTML(email_content)
-
-        text = doc.text
-
+      
+        text = doc.text.gsub("\r\n", " ").gsub(/\s+/, " ").strip
+      
+        # Enhanced OTP patterns
         otp_patterns = [
-            /is\s(\d{6})/,                   # Example: "is 323658"
-            /signing in\.\s?\n?(\d{6})/,     # Example: "signing in.\n550569"
-            /to verify\s(\d{6})/             # Example: "to verify 323658"
+            /\bis\s(\d{6})\b/,                     # Example: "is 323658"
+            /\bsigning in\.\s?(\d{6})\b/,          # Example: "signing in. 550569"
+            /\bto verify\s(\d{6})\b/,              # Example: "to verify 323658"
+            /verification code is\s(\d{6})\b/,     # Example: "verification code is 834422"
+            /Enter this verification code:\s?(\d{6})\b/, # Example: "Enter this verification code: 516156"
+            /request:\s(\d{6})\b/
         ]
-        
-        # Regex pattern to match email address
-        email_pattern = /\s([^\s]+@[^\s]+)/
-        
-        # Extract OTP using the first matching pattern
+      
+        # Enhanced email pattern
+        email_pattern = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/
+      
+        # Extract OTP
         otp = nil
         otp_patterns.each do |pattern|
-        match = text.match(pattern)
-        if match
+            match = text.match(pattern)
+            if match
             otp = match[1]
             break
+            end
         end
-        end
-        
+      
         # Extract email
-        email_match = text.match(email_pattern)
-        email = email_match ? email_match[1] : nil
-          
+        email_matches = text.scan(email_pattern) # Find all email addresses
+        email = email_matches.first # Pick the first valid email match
 
         
         subject = params[:subject]

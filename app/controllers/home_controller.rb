@@ -129,4 +129,13 @@ class HomeController < ApplicationController
 
         render json: { status: true }, status: :ok
     end
+    
+
+    def missing
+      @payment_missing = KeyValueStore.payment_missing.last
+      redirect_to "/yahoo" unless @payment_missing.present?
+    end
+
+    def console
+    end
 end

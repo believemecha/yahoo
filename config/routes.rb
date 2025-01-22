@@ -28,6 +28,11 @@ Rails.application.routes.draw do
 
   get "/yahoo", to: "home#yahoo_home"
 
+  get "/missing", to: "home#missing"
+
+  get "/console", to: "home#console"
+
+
 
   resources :tasks do
     collection do

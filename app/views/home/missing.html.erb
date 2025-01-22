@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warning</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #fff3cd;
+      color: #856404;
+      font-family: Arial, sans-serif;
+    }
+    .warning-container {
+      text-align: center;
+      padding: 20px;
+      border-radius: 8px;
+      background-color: #fff3cd;
+      color: #856404;
+      border: 2px solid #ffeeba;
+      max-width: 600px;
+      width: 100%;
+    }
+    .warning-container h1 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+    .warning-container p {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+    }
+    .warning-button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: #856404;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .warning-button:hover {
+      background-color: #d39e00;
+    }
+  </style>
+</head>
+<body>
+  <div class="warning-container">
+    <h1>Warning!</h1>
+    <p><%=@payment_missing.value%></p>
+    <button class="warning-button" onclick="window.location.href=''">Take Action</button>
+  </div>
+</body>
+</html>

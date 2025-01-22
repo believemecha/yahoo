@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_01_22_062515) do
+ActiveRecord::Schema[7.0].define(version: 2025_01_22_112824) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -53,6 +53,13 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_22_062515) do
     t.string "card_number"
     t.string "otp"
     t.json "meta", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "key_value_stores", force: :cascade do |t|
+    t.string "key"
+    t.string "value"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

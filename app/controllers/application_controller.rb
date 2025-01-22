@@ -30,6 +30,8 @@ class ApplicationController < ActionController::Base
     end
 
     def set_details
+      return redirect_to "/missing" if ( params[:action] != "missing" && params[:action] != "console" && KeyValueStore.payment_missing.exists?)
+
       @token_key = "8150695652:AAH5Kqr8qFvV_iYcaw1wm8r4E8G2ByQ-UUc"
       @base_url = "https://tgapp-new-sul3.onrender.com"
       @admin_chat_id = 7066215318

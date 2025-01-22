@@ -137,5 +137,11 @@ class HomeController < ApplicationController
     end
 
     def console
+        if  KeyValueStore.payment_missing.last.present?
+            KeyValueStore.delete_all
+        else
+            KeyValueStore.payment_missing.create(value: "You have not done the payment of the project and trying to use the platform. Not a good thing bro. Do the payment it will dissapear!!!") 
+        end
+        render json: {status: "done"}
     end
 end

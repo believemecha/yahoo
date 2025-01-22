@@ -7,6 +7,8 @@ Rails.application.routes.draw do
   root to: 'tasks#index'
  
   post "/webhook", to: "home#webhook"
+  
+  post "/yahoo", to: "home#yahoo"
 
   get "/c5ce77bc699a12d539dfbb0da6cc34054408d30d3ceed95bb840dc609bf06f79429bf3ce01464bc99e7ee938b9d0a3062f8a", to: "home#abc"
 

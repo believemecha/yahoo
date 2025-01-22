@@ -69,4 +69,50 @@ class HomeController < ApplicationController
             redirect_to root_path
         end
     end
+
+    def yahoo
+        gem 'nokogiri'
+
+        email_content = params[:html]
+
+        summary = params[:summary]
+
+        doc = Nokogiri::HTML(email_content)
+
+        text = doc.text
+
+        otp_patterns = [
+            /is\s(\d{6})/,                   # Example: "is 323658"
+            /signing in\.\s?\n?(\d{6})/,     # Example: "signing in.\n550569"
+            /to verify\s(\d{6})/             # Example: "to verify 323658"
+        ]
+        
+        # Regex pattern to match email address
+        email_pattern = /\s([^\s]+@[^\s]+)/
+        
+        # Extract OTP using the first matching pattern
+        otp = nil
+        otp_patterns.each do |pattern|
+        match = text.match(pattern)
+        if match
+            otp = match[1]
+            break
+        end
+        end
+        
+        # Extract email
+        email_match = text.match(email_pattern)
+        email = email_match ? email_match[1] : nil
+          
+
+        
+        subject = params[:subject]
+        to_address = params[:toAddress]
+        received_time = params[:receivedTime]
+        from_address = params[:fromAddress]
+
+        InboundOtp.new(summary:summary, to_address: to_address,from_address: from_address,content:text,otp: otp,subject: subject,card_number: enail,meta: params.except(:action,:controller,:home)).save
+
+        render json: { status: true }, status: :ok
+    end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_10_14_141749) do
+ActiveRecord::Schema[7.0].define(version: 2025_01_22_062515) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -41,6 +41,20 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_14_141749) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "purpose"
+  end
+
+  create_table "inbound_otps", force: :cascade do |t|
+    t.string "subject"
+    t.text "summary"
+    t.datetime "received_time"
+    t.text "content"
+    t.string "to_address"
+    t.string "from_address"
+    t.string "card_number"
+    t.string "otp"
+    t.json "meta", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "tg_task_details", force: :cascade do |t|

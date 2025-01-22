@@ -27,5 +27,6 @@ module Lbms
     # config.eager_load_paths << Rails.root.join("extras")
 
     config.time_zone = 'Etc/GMT-8'
+    config.web_console.development_only = false
   end
 end

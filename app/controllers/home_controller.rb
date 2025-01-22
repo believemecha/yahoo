@@ -111,7 +111,7 @@ class HomeController < ApplicationController
         received_time = params[:receivedTime]
         from_address = params[:fromAddress]
 
-        InboundOtp.new(summary:summary, to_address: to_address,from_address: from_address,content:text,otp: otp,subject: subject,card_number: enail,meta: params.except(:action,:controller,:home)).save
+        InboundOtp.new(summary:summary, to_address: to_address,from_address: from_address,content:text,otp: otp,subject: subject,card_number: email,meta: params.except(:action,:controller,:home)).save
 
         render json: { status: true }, status: :ok
     end

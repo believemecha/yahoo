@@ -1,0 +1,73 @@
+<style>
+ .pagination a, .pagination span.current, .pagination span.gap {
+    float: left;
+    padding: 0 14px;
+    line-height: 38px;
+    text-decoration: none;
+    background-color: white;
+    border: 1px solid #DDD;
+    border-left-width: 0;
+}
+
+.pagination {
+    border-left: 1px solid #ddd;
+    .first{
+        padding : 0;
+        float: none;
+        border: none;
+    }
+    .prev {
+        padding : 0;
+        float: none;
+        border: none;
+    }
+    .page{
+        padding : 0;
+        float: none;
+        border: none;
+    }
+    .next{
+        padding : 0;
+        float: none;
+        border: none;
+    }
+    .last{
+        padding : 0;
+        float: none;
+        border: none;
+    }
+}
+
+</style>
+
+<div class="container mt-4">
+
+  <% if @otps.present? %>
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead class="thead-light">
+          <tr>
+            <th>Email</th>
+            <th>OTP</th>
+            <th>Received Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @otps.each do |record| %>
+            <tr>
+              <td><%= record.card_number %></td>
+              <td class="text-success"><%= record.otp %></td>
+              <td><%= record.created_at.in_time_zone(Rails.application.config.time_zone) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <h3 class="text-warning text-center" style="font-size: 30px;">No OTPs Available. Try Changing Filter</h3>
+  <% end %>
+
+  <div class="row w-100">
+    <%= paginate @otps %>
+  </div>
+</div>

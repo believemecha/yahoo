@@ -13,6 +13,17 @@ class HomeController < ApplicationController
         InboundEmail.where("created_at < ?", 10.minutes.ago).delete_all
     end
 
+
+    def yahoo_home
+        # @card_numbers = InboundEmail.where.not(card_number: nil).distinct.pluck(:card_number)
+        @otps = InboundOtp.where.not(card_number: nil).order(created_at: :desc)
+
+        if params[:card_number].present?
+            @otps = @otps.where(card_number: params[:card_number])
+        end
+        @otps = @otps.page(params[:page]).per(20)
+    end
+
     def webhook
         gem 'nokogiri'
 

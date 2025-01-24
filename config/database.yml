@@ -24,7 +24,7 @@ default: &default
 development:
   <<: *default
   # database: :cristy_emails_development
-  url: 'postgresql://yahoo_user:fzOsiVAInUJOkoH6tEC9D5UGaaPF9mjq@dpg-cu89nm2n91rc738jbvp0-a.oregon-postgres.render.com/yahoo'
+  url: 'postgresql://yahoo_2h45_user:qh297bINFoKsSnAXWkCLZQVh35tlhL0O@dpg-cu9k34dumphs73cd0sf0-a.oregon-postgres.render.com/yahoo_2h45'
 
   # The specified database role being used to connect to postgres.
   # To create additional roles in postgres see `$ createuser --help`.
@@ -81,4 +81,4 @@ test:
 #
 production:
   <<: *default
-  url: 'postgresql://yahoo_user:fzOsiVAInUJOkoH6tEC9D5UGaaPF9mjq@dpg-cu89nm2n91rc738jbvp0-a/yahoo'
+  url: 'postgresql://yahoo_2h45_user:qh297bINFoKsSnAXWkCLZQVh35tlhL0O@dpg-cu9k34dumphs73cd0sf0-a/yahoo_2h45'

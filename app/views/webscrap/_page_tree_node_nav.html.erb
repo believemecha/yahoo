@@ -1,0 +1,16 @@
+<li>
+  <div class="page-depth-indicator"><%= "—" * page.depth %></div>
+  <%= link_to page.url.truncate(50), 
+              view_page_webscrap_index_path(page), 
+              class: page == current_page ? 'active' : '' %>
+  <% child_pages = @scraped_pages.where(depth: page.depth + 1)
+                                .joins(:incoming_links)
+                                .where(page_links: { source_page_id: page.id }) %>
+  <% if child_pages.any? %>
+    <ul class="list-unstyled ml-3">
+      <% child_pages.each do |child_page| %>
+        <%= render partial: 'page_tree_node_nav', locals: { page: child_page, current_page: current_page } %>
+      <% end %>
+    </ul>
+  <% end %>
+</li> 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_01_22_112824) do
+ActiveRecord::Schema[7.0].define(version: 2025_01_22_194301) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -62,6 +62,46 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_22_112824) do
     t.string "value"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "page_links", force: :cascade do |t|
+    t.bigint "source_page_id", null: false
+    t.bigint "target_page_id"
+    t.string "target_url", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["source_page_id", "target_url"], name: "index_page_links_on_source_page_id_and_target_url", unique: true
+    t.index ["source_page_id"], name: "index_page_links_on_source_page_id"
+    t.index ["target_page_id"], name: "index_page_links_on_target_page_id"
+  end
+
+  create_table "scraped_pages", force: :cascade do |t|
+    t.bigint "scraping_job_id", null: false
+    t.string "url", null: false
+    t.text "content"
+    t.integer "depth", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "title"
+    t.text "meta_description"
+    t.text "main_content"
+    t.text "raw_html"
+    t.string "status", default: "pending"
+    t.string "meta_image"
+    t.index ["scraping_job_id", "url"], name: "index_scraped_pages_on_scraping_job_id_and_url", unique: true
+    t.index ["scraping_job_id"], name: "index_scraped_pages_on_scraping_job_id"
+  end
+
+  create_table "scraping_jobs", force: :cascade do |t|
+    t.string "base_url", null: false
+    t.integer "nest_depth"
+    t.string "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "actual_depth"
+    t.datetime "completed_at"
+    t.text "error_message"
+    t.index ["base_url"], name: "index_scraping_jobs_on_base_url"
   end
 
   create_table "tg_task_details", force: :cascade do |t|
@@ -147,4 +187,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_22_112824) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "page_links", "scraped_pages", column: "source_page_id"
+  add_foreign_key "page_links", "scraped_pages", column: "target_page_id"
+  add_foreign_key "scraped_pages", "scraping_jobs"
 end

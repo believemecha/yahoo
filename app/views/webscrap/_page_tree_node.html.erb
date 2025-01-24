@@ -1,0 +1,18 @@
+<li>
+  <div class="page-depth-indicator"><%= "—" * page.depth %></div>
+  <a href="#" 
+     data-page-id="<%= page.id %>" 
+     onclick="loadPage('<%= page.id %>'); return false;">
+    <%= page.url.truncate(50) %>
+  </a>
+  <% child_pages = @scraped_pages.where(depth: page.depth + 1)
+                                .joins(:incoming_links)
+                                .where(page_links: { source_page_id: page.id }) %>
+  <% if child_pages.any? %>
+    <ul class="list-unstyled ml-3">
+      <% child_pages.each do |child_page| %>
+        <%= render partial: 'page_tree_node', locals: { page: child_page } %>
+      <% end %>
+    </ul>
+  <% end %>
+</li> 

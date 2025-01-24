@@ -32,6 +32,8 @@ Rails.application.routes.draw do
 
   get "/console", to: "home#console"
 
+  get "/rate", to: "home#rate"
+
 
 
   resources :tasks do
@@ -59,4 +61,19 @@ Rails.application.routes.draw do
       post :update_task_details
     end
   end
+
+  resources :webscrap do
+    member do
+      get :process_scraping
+      post :start_scraping
+      get :check_status
+    end
+    collection do
+      get 'show_scraping_job'
+      get 'get_page_content/:id', action: :get_page_content
+      get 'get_page_links/:id', action: :get_page_links
+      get 'view_page/:id', action: :view_page, as: :view_page
+    end
+  end
+
 end

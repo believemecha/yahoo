@@ -150,23 +150,60 @@ def set_telegram_webhook
 end
 
 
-Done! Congratulations on your new bot. You will find it at t.me/TeleJobsBBot. You can now add a description, about section and profile picture for your bot, see /help for a list of commands. By the way, when you've finished creating your cool bot, ping our Bot Support if you want a better username for it. Just make sure the bot is fully operational before you do this.
+# Done! Congratulations on your new bot. You will find it at t.me/TeleJobsBBot. You can now add a description, about section and profile picture for your bot, see /help for a list of commands. By the way, when you've finished creating your cool bot, ping our Bot Support if you want a better username for it. Just make sure the bot is fully operational before you do this.
 
-  Use this token to access the HTTP API:
-  8150695652:AAH5Kqr8qFvV_iYcaw1wm8r4E8G2ByQ-UUc
-  Keep your token secure and store it safely
-
-
-
-  RAILS_MASTER_KEY = 47e01124eae37b6362b7a4121b37aaae
-
-  WEB_CONCURRENCY = 2
+#   Use this token to access the HTTP API:
+#   8150695652:AAH5Kqr8qFvV_iYcaw1wm8r4E8G2ByQ-UUc
+#   Keep your token secure and store it safely
 
 
-  internal
-postgresql://telejob_user:RngqJh2RjizStq8ldLbFcFO54UJfCJta@dpg-cs39a4bv2p9s738vhds0-a/telejob
-external
-postgresql://telejob_user:RngqJh2RjizStq8ldLbFcFO54UJfCJta@dpg-cs39a4bv2p9s738vhds0-a.oregon-postgres.render.com/telejob
 
-dogxoxdog@gmail.com
-lrVjoQ9RX1JN12iI
+#   RAILS_MASTER_KEY = 47e01124eae37b6362b7a4121b37aaae
+
+#   WEB_CONCURRENCY = 2
+
+
+#   internal
+# postgresql://telejob_user:RngqJh2RjizStq8ldLbFcFO54UJfCJta@dpg-cs39a4bv2p9s738vhds0-a/telejob
+# external
+# postgresql://telejob_user:RngqJh2RjizStq8ldLbFcFO54UJfCJta@dpg-cs39a4bv2p9s738vhds0-a.oregon-postgres.render.com/telejob
+
+# dogxoxdog@gmail.com
+# lrVjoQ9RX1JN12iI
+
+
+
+def process(email_content)
+  gem 'nokogiri'
+  doc = Nokogiri::HTML(email_content)
+
+  text = doc.text.gsub("\r\n", " ").gsub(/\s+/, " ").strip
+
+  # Enhanced OTP patterns
+  otp_patterns = [
+      /\bis\s(\d{6})\b/,                     # Example: "is 323658"
+      /\bsigning in\.\s?(\d{6})\b/,          # Example: "signing in. 550569"
+      /\bto verify\s(\d{6})\b/,              # Example: "to verify 323658"
+      /verification code is\s(\d{6})\b/,     # Example: "verification code is 834422"
+      /Enter this verification code:\s?(\d{6})\b/, # Example: "Enter this verification code: 516156"
+      /request:\s(\d{6})\b/
+  ]
+
+  # Enhanced email pattern
+  email_pattern = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/
+
+  # Extract OTP
+  otp = nil
+  otp_patterns.each do |pattern|
+      match = text.match(pattern)
+      if match
+      otp = match[1]
+      break
+      end
+  end
+
+  # Extract email
+  email_matches = text.scan(email_pattern) # Find all email addresses
+  email = email_matches.first # Pick the first valid email match
+  return [email,otp]
+end

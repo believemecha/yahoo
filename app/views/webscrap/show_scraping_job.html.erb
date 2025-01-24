@@ -1,0 +1,269 @@
+<div class="container-fluid mt-4">
+  <!-- Header Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Web Scraping Results</h2>
+            <div class="stats-badges">
+              <span class="badge bg-primary">Pages: <%= @scraped_pages.count %></span>
+              <span class="badge <%= @scraping_job.status == 'completed' ? 'bg-success' : 'bg-warning' %>">
+                Status: <%= @scraping_job.status.titleize %>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="row">
+    <!-- Left Panel - Site Structure -->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header bg-light">
+          <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Site Structure</h4>
+            <div class="input-group w-50">
+              <input type="text" class="form-control form-control-sm" id="pageSearch" 
+                     placeholder="Search pages...">
+              <span class="input-group-text">
+                <i class="fas fa-search"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="site-tree p-3" style="max-height: 80vh; overflow-y: auto;">
+            <div class="list-group list-group-flush">
+              <% @root_pages = @scraped_pages.where(depth: 0) %>
+              <% @root_pages.each do |page| %>
+                <%= render partial: 'page_tree_node_nav', locals: { page: page, current_page: nil } %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel - Statistics & Quick Access -->
+    <div class="col-md-8">
+      <!-- Quick Stats Cards -->
+      <div class="row mb-4">
+        <div class="col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <h6 class="card-title">Total Pages</h6>
+              <h3 class="card-text text-primary"><%= @scraped_pages.count %></h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <h6 class="card-title">Max Depth</h6>
+              <h3 class="card-text text-success"><%= @scraped_pages.maximum(:depth) || 0 %></h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <h6 class="card-title">Total Links</h6>
+              <h3 class="card-text text-info"><%= PageLink.where(source_page: @scraped_pages).count %></h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <h6 class="card-title">Scraping Time</h6>
+              <h3 class="card-text text-warning">
+                <%= ((Time.current - @scraping_job.created_at)/60).round %> min
+              </h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Most Linked Pages -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Most Referenced Pages</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Page URL</th>
+                  <th>Incoming Links</th>
+                  <th>Outgoing Links</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @scraped_pages.left_joins(:incoming_links)
+                   .group('scraped_pages.id')
+                   .order('COUNT(page_links.id) DESC')
+                   .limit(5).each do |page| %>
+                  <tr>
+                    <td class="text-truncate" style="max-width: 300px;">
+                      <%= page.url %>
+                    </td>
+                    <td><%= page.incoming_links.count %></td>
+                    <td><%= page.outgoing_links.count %></td>
+                    <td>
+                      <%= link_to 'View', view_page_webscrap_index_path(page), 
+                          class: 'btn btn-sm btn-primary' %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Depth Distribution -->
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Pages by Depth</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Depth</th>
+                  <th>Pages</th>
+                  <th>Distribution</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @scraped_pages.group(:depth).count.sort.each do |depth, count| %>
+                  <tr>
+                    <td>Level <%= depth %></td>
+                    <td><%= count %></td>
+                    <td>
+                      <div class="progress">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: <%= (count.to_f / @scraped_pages.count * 100).round %>%">
+                          <%= (count.to_f / @scraped_pages.count * 100).round %>%
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.site-tree {
+  font-size: 0.9rem;
+}
+
+.site-tree .list-group-item {
+  border: none;
+  border-radius: 0;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.site-tree .list-group-item:hover {
+  background-color: #f8f9fa;
+}
+
+.site-tree a {
+  color: #2c3e50;
+  text-decoration: none;
+  display: block;
+  padding: 0.25rem 0;
+}
+
+.site-tree a:hover {
+  color: #3498db;
+}
+
+.site-tree a.active {
+  color: #3498db;
+  font-weight: bold;
+}
+
+.page-depth-indicator {
+  color: #95a5a6;
+  font-family: monospace;
+  margin-right: 0.5rem;
+}
+
+.progress {
+  height: 20px;
+}
+
+.progress-bar {
+  background-color: #3498db;
+}
+
+.card {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.badge {
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  margin-left: 8px;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+
+.stats-badges .badge {
+  font-size: 1rem;
+}
+
+#pageSearch {
+  border-right: none;
+}
+
+.input-group-text {
+  background-color: white;
+  border-left: none;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('pageSearch');
+  
+  searchInput.addEventListener('keyup', function() {
+    const searchText = this.value.toLowerCase();
+    const treeNodes = document.querySelectorAll('.site-tree .list-group-item');
+    
+    treeNodes.forEach(node => {
+      const link = node.querySelector('a');
+      const url = link.textContent.toLowerCase();
+      node.style.display = url.includes(searchText) ? '' : 'none';
+    });
+  });
+
+  // Make entire table row clickable
+  document.querySelectorAll('.table-hover tr').forEach(row => {
+    row.addEventListener('click', function(e) {
+      if (e.target.tagName !== 'A') {
+        const link = this.querySelector('a');
+        if (link) link.click();
+      }
+    });
+  });
+});
+</script>

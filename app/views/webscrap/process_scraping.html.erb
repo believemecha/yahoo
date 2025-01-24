@@ -1,0 +1,164 @@
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header">
+      <h2>Processing Scraping Job</h2>
+    </div>
+    <div class="card-body">
+      <div class="mb-4">
+        <h4>Target URL: <%= @scraping_job.base_url %></h4>
+        <p>Maximum Depth: <%= @scraping_job.nest_depth %></p>
+      </div>
+
+      <div class="progress mb-4" style="height: 25px;">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+             role="progressbar" style="width: 0%" 
+             id="progressBar">
+          Initializing...
+        </div>
+      </div>
+
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body text-center">
+              <h5>Pages Scraped</h5>
+              <h3 id="pagesCount">0</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body text-center">
+              <h5>Current Depth</h5>
+              <h3 id="currentDepth">0</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body text-center">
+              <h5>Status</h5>
+              <h3><span class="badge bg-warning" id="status">Initializing</span></h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5>Recently Scraped URLs</h5>
+        </div>
+        <div class="card-body">
+          <ul class="list-group" id="recentUrls">
+          </ul>
+        </div>
+      </div>
+
+      <div id="completionMessage" style="display: none;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Start polling for updates immediately
+  pollStatus();
+});
+
+function pollStatus() {
+  fetch('/webscrap/<%= @scraping_job.id %>/check_status')
+    .then(response => response.json())
+    .then(data => {
+      updateUI(data);
+      
+      if (data.status === 'completed') {
+        handleCompletion({
+          status: 'completed',
+          message: 'Scraping completed successfully',
+          redirect_url: '/webscrap/show_scraping_job?id=<%= @scraping_job.id %>'
+        });
+      } else if (data.status === 'failed') {
+        handleError({
+          message: 'Scraping failed. Please check the logs for details.'
+        });
+      } else {
+        // Continue polling if still in progress
+        setTimeout(pollStatus, 1000);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      handleError(error);
+    });
+}
+
+function updateUI(data) {
+  // Update progress bar
+  const progressPercent = Math.min((data.current_depth / <%= @scraping_job.nest_depth %> * 100), 100);
+  const progressBar = document.getElementById('progressBar');
+  progressBar.style.width = `${progressPercent}%`;
+  progressBar.textContent = `${Math.round(progressPercent)}%`;
+
+  // Update counters
+  document.getElementById('pagesCount').textContent = data.total_pages;
+  document.getElementById('currentDepth').textContent = data.current_depth;
+
+  // Update status badge
+  const statusBadge = document.getElementById('status');
+  statusBadge.textContent = data.status.toUpperCase();
+  statusBadge.className = `badge ${data.status === 'completed' ? 'bg-success' : 
+                                  data.status === 'failed' ? 'bg-danger' : 'bg-warning'}`;
+
+  // Update recent URLs
+  const recentUrlsList = document.getElementById('recentUrls');
+  recentUrlsList.innerHTML = data.recent_urls
+    .map(url => `<li class="list-group-item">${url}</li>`)
+    .join('');
+}
+
+function handleCompletion(data) {
+  const message = document.getElementById('completionMessage');
+  message.innerHTML = `
+    <div class="alert alert-success">
+      <h4>Scraping Completed Successfully!</h4>
+      <p>${data.message}</p>
+      <div class="mt-3">
+        <a href="${data.redirect_url}" class="btn btn-primary">View Results</a>
+        <a href="/webscrap" class="btn btn-secondary">Back to Jobs List</a>
+      </div>
+    </div>
+  `;
+  message.style.display = 'block';
+}
+
+function handleError(error) {
+  const message = document.getElementById('completionMessage');
+  message.innerHTML = `
+    <div class="alert alert-danger">
+      <h4>Scraping Failed</h4>
+      <p>${error.message}</p>
+      <div class="mt-3">
+        <a href="/webscrap" class="btn btn-primary">Back to Jobs List</a>
+      </div>
+    </div>
+  `;
+  message.style.display = 'block';
+}
+</script>
+
+<style>
+.progress {
+  height: 25px;
+}
+.progress-bar {
+  font-size: 1rem;
+  line-height: 25px;
+}
+.card {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.list-group-item {
+  word-break: break-all;
+}
+</style> 

@@ -1,0 +1,99 @@
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header">
+      <h2>New Scraping Job</h2>
+    </div>
+    <div class="card-body">
+      <%= form_with(model: @scraping_job, url: webscrap_index_path, local: true, class: 'needs-validation', data: { turbo: false }) do |f| %>
+        <% if @scraping_job.errors.any? %>
+          <div class="alert alert-danger">
+            <h4>Errors:</h4>
+            <ul>
+              <% @scraping_job.errors.full_messages.each do |msg| %>
+                <li><%= msg %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <div class="mb-3">
+          <%= f.label :base_url, 'URL to Scrape', class: 'form-label' %>
+          <%= f.url_field :base_url, class: 'form-control', required: true,
+              placeholder: 'https://example.com' %>
+          <div class="form-text">Enter the full URL including http:// or https://</div>
+        </div>
+
+        <div class="mb-3">
+          <%= f.label :nest_depth, 'Maximum Depth', class: 'form-label' %>
+          <%= f.number_field :nest_depth, class: 'form-control', required: true,
+              min: 1, max: 100, value: 3 %>
+          <div class="form-text">How deep should we crawl? (1-10)</div>
+        </div>
+
+        <div class="mb-3">
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            The scraping process will start immediately and might take several minutes depending on the website size and depth.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <%= f.submit 'Start Scraping', 
+              class: 'btn btn-primary',
+              id: 'submit-button',
+              data: { 
+                disable_with: 'Starting scraping...'
+              } %>
+          <%= link_to 'Back to Jobs', webscrap_index_path, class: 'btn btn-secondary' %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card mt-4">
+    <div class="card-header">
+      <h4>Tips for Better Scraping</h4>
+    </div>
+    <div class="card-body">
+      <ul class="list-group">
+        <li class="list-group-item">
+          <strong>Start Small:</strong> Begin with a depth of 1-2 to test the website structure
+        </li>
+        <li class="list-group-item">
+          <strong>URL Format:</strong> Make sure to include the full URL with protocol (http:// or https://)
+        </li>
+        <li class="list-group-item">
+          <strong>Be Patient:</strong> Larger websites with greater depth will take longer to scrape
+        </li>
+        <li class="list-group-item">
+          <strong>Respect Robots.txt:</strong> Ensure you have permission to scrape the target website
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form');
+  const submitButton = document.getElementById('submit-button');
+  
+  form.addEventListener('submit', function(e) {
+    // Disable the submit button
+    submitButton.disabled = true;
+    submitButton.value = 'Starting scraping...';
+  });
+});
+</script>
+
+<style>
+.card {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.alert {
+  margin-bottom: 0;
+}
+.list-group-item {
+  border-left: 3px solid #007bff;
+}
+</style> 

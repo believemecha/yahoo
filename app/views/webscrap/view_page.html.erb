@@ -1,0 +1,174 @@
+<div class="container-fluid mt-4">
+  <div class="row">
+    <!-- Navigation breadcrumb -->
+    <div class="col-12 mb-3">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to 'Scraping Jobs', show_scraping_job_webscrap_index_path %></li>
+          <li class="breadcrumb-item active"><%= @page.url %></li>
+        </ol>
+      </nav>
+    </div>
+
+    <!-- Left sidebar with page hierarchy -->
+    <div class="col-md-3">
+      <div class="card">
+        <div class="card-header">
+          <h4>Site Navigation</h4>
+          <input type="text" class="form-control mt-2" id="pageSearch" placeholder="Search pages...">
+        </div>
+        <div class="card-body">
+          <div id="pageTree">
+            <ul class="list-unstyled">
+              <% @root_pages = @scraped_pages.where(depth: 0) %>
+              <% @root_pages.each do |page| %>
+                <%= render partial: 'page_tree_node_nav', locals: { page: page, current_page: @page } %>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main content area -->
+    <div class="col-md-9">
+      <div class="card">
+        <div class="card-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <h3><%= @page.title || @page.url %></h3>
+            <a href="<%= @page.url %>" target="_blank" class="btn btn-primary">Visit Original Page</a>
+          </div>
+          <small class="text-muted">
+            Depth: <%= @page.depth %> | 
+            Status: <span class="badge <%= @page.status == 'completed' ? 'bg-success' : 'bg-warning' %>"><%= @page.status %></span> |
+            Scraped at: <%= @page.created_at.strftime("%Y-%m-%d %H:%M:%S") %>
+          </small>
+          
+          <div class="mt-2">
+            <% if @page.meta_image.present? %>
+              <div class="meta-image-container mb-2">
+                <%= image_tag @page.meta_image, class: 'meta-image', alt: @page.title %>
+              </div>
+            <% end %>
+            <% if @page.meta_description.present? %>
+              <small class="text-muted">
+                <strong>Meta Description:</strong> <%= @page.meta_description %>
+              </small>
+            <% end %>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="content-area mb-4">
+            <h5>Page Content:</h5>
+            <% if @page.status == 'error' %>
+              <div class="alert alert-danger">
+                Error: <%= @page.content %>
+              </div>
+            <% else %>
+              <div class="page-content p-3 bg-light rounded">
+                <%= simple_format(@page.main_content) %>
+              </div>
+            <% end %>
+          </div>
+
+          <div class="links-area">
+            <div class="row">
+              <div class="col-md-6">
+                <h5>Outgoing Links (<%= @page.outgoing_links.count %>):</h5>
+                <ul class="list-group">
+                  <% @page.outgoing_links.each do |link| %>
+                    <% target_page = @scraped_pages.find_by(url: link.target_url) %>
+                    <li class="list-group-item">
+                      <% if target_page %>
+                        <%= link_to link.target_url, view_page_webscrap_index_path(target_page), class: 'text-primary' %>
+                      <% else %>
+                        <a href="<%= link.target_url %>" target="_blank" class="text-muted"><%= link.target_url %></a>
+                        <span class="badge bg-secondary">External</span>
+                      <% end %>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+              <div class="col-md-6">
+                <h5>Incoming Links (<%= @page.incoming_links.count %>):</h5>
+                <ul class="list-group">
+                  <% @page.incoming_links.each do |link| %>
+                    <li class="list-group-item">
+                      <%= link_to link.source_page.url, view_page_webscrap_index_path(link.source_page), class: 'text-primary' %>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('pageSearch');
+  
+  searchInput.addEventListener('keyup', function() {
+    const searchText = this.value.toLowerCase();
+    const treeNodes = document.querySelectorAll('#pageTree li');
+    
+    treeNodes.forEach(node => {
+      const link = node.querySelector('a');
+      const url = link.textContent.toLowerCase();
+      node.style.display = url.includes(searchText) ? '' : 'none';
+    });
+  });
+});
+</script>
+
+<style>
+#pageTree {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+#pageTree a {
+  color: #333;
+  text-decoration: none;
+  display: block;
+  padding: 4px 0;
+}
+#pageTree a:hover {
+  color: #007bff;
+}
+#pageTree a.active {
+  color: #007bff;
+  font-weight: bold;
+}
+.page-content {
+  max-height: 60vh;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+}
+.page-depth-indicator {
+  display: inline-block;
+  margin-right: 5px;
+  color: #666;
+}
+.list-group-item {
+  word-break: break-all;
+}
+.badge {
+  font-size: 0.8em;
+  padding: 0.3em 0.6em;
+}
+.meta-image-container {
+  max-width: 300px;
+  margin-top: 10px;
+}
+.meta-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+</style> 

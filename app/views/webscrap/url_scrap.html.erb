@@ -1,0 +1,34 @@
+<div class="container-fluid p-4">
+  <h2>Scraped Content</h2>
+  
+  <div class="card w-100">
+    <div class="card-body p-0">
+      <% if @text.present? %>
+        <div class="scraped-content">
+          <%= simple_format(@text) %>
+        </div>
+      <% else %>
+        <div class="alert alert-warning">
+          No content was found.
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <style>
+    .scraped-content {
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+      font-size: 14px;
+      line-height: 1.6;
+      width: 100%;
+    }
+    
+    .scraped-content p {
+      margin-bottom: 10px;
+    }
+  </style>
+</div>

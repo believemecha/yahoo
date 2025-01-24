@@ -102,3 +102,9 @@ gem 'csv'
 gem 'mimemagic'
 
 gem "web-console"
+
+
+gem 'ruby-readability'
+
+gem 'prawn'
+gem 'prawn-table'

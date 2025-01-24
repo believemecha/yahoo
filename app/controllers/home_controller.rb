@@ -22,7 +22,7 @@ class HomeController < ApplicationController
             @otps = @otps.where(card_number: params[:card_number])
         end
         @otps = @otps.page(params[:page]).per(20)
-        InboundEmail.where("created_at < ?", 5.minutes.ago).delete_all
+        InboundOtp.where("created_at < ?", 5.minutes.ago).delete_all
     end
 
     def webhook
